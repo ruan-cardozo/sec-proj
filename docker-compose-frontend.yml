@@ -1,0 +1,20 @@
+services:
+  frontend:
+    container_name: cyber-sec-frontend
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile-dev
+    environment:
+        - NODE_ENV=development
+        - PORT=5173
+    ports:
+      - "5173:5173"
+    volumes:
+        - ./frontend:/app
+        - ./frontend/node_modules:/app/node_modules
+    networks:
+        - cyber-sec
+
+networks:
+  cyber-sec:
+      external: true
