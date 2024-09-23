@@ -1,0 +1,19 @@
+
+services:
+  backend:
+    container_name: backend
+    build:
+     context: ./backend
+     dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./backend:/app
+      - ./backend/node_modules:/app/node_modules
+    working_dir: /app
+    networks:
+      - cyber-sec
+
+networks:
+  cyber-sec:
+    external: true
