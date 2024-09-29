@@ -15,13 +15,13 @@ app.listen(3000, () => {
 app.post('/api/login', async (req, res) => {
   const { email, password } = req.body;
 
-  console.log(email, password);
-
   try {
     const result = await pool.query(`SELECT * FROM users WHERE email = '${email}'`);
     const user = result.rows[0];
-
-    console.log(result);
+    
+    if (!result) {
+      return res.status(404).send('User not found');
+    }
 
     if (!user || user.password !== password) {
       return res.status(401).send('Invalid credentials');
@@ -38,6 +38,12 @@ app.post('/api/login', async (req, res) => {
 app.get('/api/users', authenticateToken, async (req, res) => {
   try {
     const result = await pool.query('SELECT * FROM users');
+
+    if (!result) {
+
+      return res.status(404).send('No users found');
+    }
+
     res.json(result.rows);
   } catch (err) {
     console.error(err);
@@ -49,6 +55,12 @@ app.get('/api/users/:id', authenticateToken, async (req, res) => {
   try {
     const { id } = req.params;
     const result = await pool.query(`SELECT * FROM users WHERE id = ${id}`);
+
+    if (!result) {
+
+      return res.status(404).send('User not found');
+    }
+
     res.json(result.rows[0]);
   } catch (err) {
     console.error(err);
@@ -59,10 +71,19 @@ app.get('/api/users/:id', authenticateToken, async (req, res) => {
 app.post('/api/users', async (req, res) => {
   try {
     const { name, email, password } = req.body;
+
+    const user = await pool.query(`SELECT * FROM users WHERE email = '${email}'`);
     const result = await pool.query(
       `INSERT INTO users (name, email, password) VALUES ('${name}', '${email}', '${password}') RETURNING *`
     );
+
+    if (user.email === email) {
+
+      return res.status(400).send('User already exists');
+    }
+
     res.status(201).json(result.rows[0]);
+
   } catch (err) {
     console.error(err);
     res.status(500).send('Server Error');
@@ -73,9 +94,17 @@ app.put('/api/users/:id', authenticateToken, async (req, res) => {
   try {
     const { id } = req.params;
     const { name, email } = req.body;
+
+    const user = await pool.query(`SELECT * FROM users WHERE id = ${id}`);
     const result = await pool.query(
       `UPDATE users SET name = '${name}', email = '${email}' WHERE id = ${id} RETURNING *`
     );
+
+    if (user.email === email) {
+
+      return res.status(400).send('User already exists');
+    }
+
     res.json(result.rows[0]);
   } catch (err) {
     console.error(err);
@@ -86,8 +115,10 @@ app.put('/api/users/:id', authenticateToken, async (req, res) => {
 app.delete('/api/users/:id', authenticateToken, async (req, res) => {
   try {
     const { id } = req.params;
+
     await pool.query(`DELETE FROM users WHERE id = ${id}`);
-    res.send('User deleted');
+
+    res.status(200).send('User deleted');
   } catch (err) {
     console.error(err);
     res.status(500).send('Server Error');
