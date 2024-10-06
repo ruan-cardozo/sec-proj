@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import './UserRegisterForm.css';
+import './UpdateUserForm.css';
 import { useNavigate } from 'react-router-dom';
 
-function UserRegisterForm() {
+function UpdateUserForm() {
 
 	const [formData, setFormData] = useState({
 		name: '',
@@ -19,25 +19,21 @@ function UserRegisterForm() {
 
 	const handleSubmit = async (event: React.FormEvent) => {
 		event.preventDefault();
-        
 
-        console.log(JSON.stringify(formData));
-
+        const userId = localStorage.getItem('userLogged');
 
 		try {
-			const response = await fetch('http://localhost:3000/api/users', {
-				method: 'POST',
+			const response = await fetch(`http://localhost:3000/api/users/${userId}`, {
+				method: 'PUT',
 				headers: {
 					'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
 				},
 				body: JSON.stringify(formData)
 			});
-
             console.log(response);
-            
-
 			if (response.ok) {
-				alert('Usuário cadastrado com sucesso!');
+				alert('Usuário atualizado com sucesso!');
 
 				setFormData({
 					name: '',
@@ -45,7 +41,7 @@ function UserRegisterForm() {
 					password: ''
 				});
 			} else {
-				alert('Ocorreu um erro ao cadastrar o usuário!');
+				alert('Ocorreu um erro ao atualizar o usuário!');
 			}
 		} catch (error) {
 			console.error('Ocorreu um erro ao enviar os dados para a api', error);
@@ -92,13 +88,12 @@ function UserRegisterForm() {
                             onChange={handleChange}
                         />
                     </div>
-                    <button type="submit" className="btn-form">Registrar</button>
+                    <button type="submit" className="btn-form">Salvar</button>
                 </form>
             </div>
-            <button type='button' onClick={() => navigate('/login')} className="btn-login" > Ir para o login</button>
-            <button type='button' onClick={() => navigate('/update')} className="btn-login" > Ir para tela de atualizar usuário</button>
+            <button type='button' onClick={() => navigate('/')} className="btn-login" > Ir para tela inicial</button>
         </div>
     );
 }
 
-export default UserRegisterForm;
+export default UpdateUserForm;

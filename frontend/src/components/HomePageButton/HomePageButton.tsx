@@ -5,7 +5,7 @@ function HomePageButton() {
 
     const location = useLocation();
 
-    if (location.pathname == '/register' || location.pathname == '/login') return; 
+    if (location.pathname == '/register' || location.pathname == '/login' || location.pathname == '/update') return; 
     
     return (
 

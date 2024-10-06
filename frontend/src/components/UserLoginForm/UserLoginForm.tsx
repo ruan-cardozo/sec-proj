@@ -1,4 +1,4 @@
-import { HTMLInputTypeAttribute, useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import './UserLoginForm.css';
 
@@ -8,7 +8,7 @@ function UserLoginForm() {
 		email: '',
 		password: ''
 	});
-	const [userMessage, setUserMessage] = useState('');  // Para exibir uma mensagem com potencial de XSS
+	const [userMessage, setUserMessage] = useState('');
 	const navigate = useNavigate();
 
 	const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -24,7 +24,7 @@ function UserLoginForm() {
 		console.log('aaa', userMessage);
 
 		try {
-			const response = await fetch('http://localhost:3000/api/users', {
+			const response = await fetch('http://localhost:3000/api/login', {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
@@ -33,11 +33,16 @@ function UserLoginForm() {
 			});
 
 			if (response.ok) {
-				alert('Usuário foi logado com sucesso');
+
+				const data = await response.json();
+				localStorage.setItem('token', data.accessToken);
+				localStorage.setItem('userLogged', data.userId);
+				document.cookie = `token=${data.accessToken}; path=/; max-age=${60 * 60 * 24}`; //um dia de validade
 				setFormData({
 					email: '',
 					password: ''
 				});
+				alert('Usuário autenticado com sucesso!');
 			} else {
 				alert('Ocorreu um erro ao autenticar o usuário!');
 			}
@@ -80,7 +85,7 @@ function UserLoginForm() {
 
 			{/* Exibindo a mensagem de boas-vindas diretamente no DOM, sem sanitização */}
 			<div className="user-message" dangerouslySetInnerHTML={{ __html: userMessage }}></div>
-
+            <button type='button' onClick={() => navigate('/update')} className="btn-login" > Ir para a tela de atualizar usuário</button>
 			<button type='button' onClick={() => navigate('/register')} className="btn-register" > Ir para registrar-se</button>
 		</div>
 	);

