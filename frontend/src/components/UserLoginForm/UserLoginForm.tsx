@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { HTMLInputTypeAttribute, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import './UserLoginForm.css';
 
@@ -8,7 +8,8 @@ function UserLoginForm() {
 		email: '',
 		password: ''
 	});
-    const navigate = useNavigate();
+	const [userMessage, setUserMessage] = useState('');  // Para exibir uma mensagem com potencial de XSS
+	const navigate = useNavigate();
 
 	const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
 		const { name, value } = event.target;
@@ -17,10 +18,10 @@ function UserLoginForm() {
 
 	const handleSubmit = async (event: React.FormEvent) => {
 		event.preventDefault();
-        
+		
+		setUserMessage(`Bem-vindo, ${formData.email}`);
 
-        console.log(JSON.stringify(formData));
-
+		console.log('aaa', userMessage);
 
 		try {
 			const response = await fetch('http://localhost:3000/api/users', {
@@ -33,7 +34,6 @@ function UserLoginForm() {
 
 			if (response.ok) {
 				alert('Usuário foi logado com sucesso');
-
 				setFormData({
 					email: '',
 					password: ''
@@ -47,39 +47,43 @@ function UserLoginForm() {
 	};
 
 	return (
-        <div className='row'>
-            <div className='box'> 
-                <form className="register-form" onSubmit={handleSubmit}>
-                    <div className="form-group">
-                        <label>Email:</label>
-                        <br />
-                        <input
-                            type="text"
-                            name="email"
-                            placeholder='Digite seu email...'
-                            className="form-control"
-                            value={formData.email}
-                            onChange={handleChange}
-                        />
-                    </div>
-                    <div className="form-group">
-                        <label>Senha:</label>
-                        <br />
-                        <input
-                            type="password"
-                            name="password"
-                            className="form-control"
-                            placeholder='Digite sua senha...'
-                            value={formData.password}
-                            onChange={handleChange}
-                        />
-                    </div>
-                    <button type="submit" className="btn-form">Login</button>
-                </form>
-            </div>
-            <button type='button' onClick={() => navigate('/register')} className="btn-register" > Ir para registrar-se</button>
-        </div>
-    );
+		<div className='row'>
+			<div className='box'> 
+				<form className="register-form" onSubmit={handleSubmit}>
+					<div className="form-group">
+						<label>Email:</label>
+						<br />
+						<input
+							type="text"
+							name="email"
+							placeholder='Digite seu email...'
+							className="form-control"
+							value={formData.email}
+							onChange={handleChange}
+						/>
+					</div>
+					<div className="form-group">
+						<label>Senha:</label>
+						<br />
+						<input
+							type="password"
+							name="password"
+							className="form-control"
+							placeholder='Digite sua senha...'
+							value={formData.password}
+							onChange={handleChange}
+						/>
+					</div>
+					<button type="submit" className="btn-form">Login</button>
+				</form>
+			</div>
+
+			{/* Exibindo a mensagem de boas-vindas diretamente no DOM, sem sanitização */}
+			<div className="user-message" dangerouslySetInnerHTML={{ __html: userMessage }}></div>
+
+			<button type='button' onClick={() => navigate('/register')} className="btn-register" > Ir para registrar-se</button>
+		</div>
+	);
 }
 
 export default UserLoginForm;

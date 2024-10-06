@@ -16,11 +16,16 @@ app.post('/api/login', async (req, res) => {
   const { email, password } = req.body;
 
   try {
-    const result = await pool.query(`SELECT * FROM users WHERE email = '${email}'`);
+    const result = await pool.query(`SELECT * FROM users WHERE email = '${email} and password = '${password}'`);
     const user = result.rows[0];
     
     if (!result) {
       return res.status(404).send('User not found');
+    }
+
+    if (result) {
+
+      return res.status(200).send('Logado com sucesso');
     }
 
     if (!user || user.password !== password) {
@@ -51,17 +56,24 @@ app.get('/api/users', authenticateToken, async (req, res) => {
   }
 });
 
-app.get('/api/users/:id', authenticateToken, async (req, res) => {
+app.get('/api/users/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    const result = await pool.query(`SELECT * FROM users WHERE id = ${id}`);
+
+    console.log({id});
+
+    const query = `SELECT * FROM users WHERE id = ${id}`;
+  
+    console.log({query});
+
+    const result = await pool.query(query);
 
     if (!result) {
 
       return res.status(404).send('User not found');
     }
 
-    res.json(result.rows[0]);
+    res.json(result.rows);
   } catch (err) {
     console.error(err);
     res.status(500).send('Server Error');
