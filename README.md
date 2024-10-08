@@ -8,8 +8,6 @@ Você pode instalar o docker na sua máquina seguindo a documentação:
 
 - https://github.com/codeedu/wsl2-docker-quickstart
 
-Para executar o projeto basta iniciar os containers:
-
 ## Antes de iniciar os containers:
 
 1. Você precisa ter o docker instalado.
@@ -51,7 +49,65 @@ docker compose -f docker-compose-backend.yml up --build
 docker compose -f docker-compose-frontend.yml up --build
 ```
 
-# Após fazer todos esses passos a aplicação deve estar disponível nos seguintes link:
+## Após fazer todos esses passos a aplicação deve estar disponível nos seguintes link:
 
-1. Frontend: localhost:5173
-2. Backend: localhost:3000
+1. Frontend: `localhost:5173`
+2. Backend: `localhost:3000`
+3. Html malicioso para o ataque CSRF: `localhost:5174`
+
+## Exemplos de requisições
+
+### Cadastro de usuário
+
+Temos a rota de post para cadastro de usuários:
+
+É necessário passar as seguintes informações no body:
+
+URL: `POST -> localhost:3000/api/users`
+
+```json
+{
+    "name": "João Paulo",
+    "email": "joao.paulo@email.com",
+    "password": "joao123" 
+}
+```
+
+### Login dos usuários
+
+Temos a rota de login:
+
+Para o login basta passar o email e senha:
+
+URL: `POST -> localhost:3000/api/login`
+
+```json
+{
+    "email": "joao.paulo@email.com",
+    "password": "joao123" 
+}
+```
+
+### Buscar usuários
+
+A rota de buscar usuário temos duas opções:
+
+Busca todos os usuários:
+
+URL: `GET -> localhost:3000/api/users`
+
+Aqui você precisa passar o Bearer Token to header da requisição
+
+```json
+{
+    "Authorization": "<SEU_TOKEN>",
+}
+```
+
+Você pode obter o token pela fazendo o login na aplicação
+
+Busca apenas um usuário pelo id:
+
+Nessa rota também é necessário passar o bearer token no header da requisição, como no exemplo acima
+
+`GET -> localhost:3000/api/users/<ID_USER>`

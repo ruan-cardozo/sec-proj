@@ -1,7 +1,6 @@
 const express = require('express');
 const app = express();
 const pool = require('./db');
-const authenticateToken = require('./auth');
 const jwt = require('jsonwebtoken');
 const cors = require('cors');
 
@@ -18,7 +17,9 @@ app.post('/api/login', async (req, res) => {
 	try {
 		const result = await pool.query(`SELECT * FROM users WHERE email = '${email}' and password = '${password}'`);
 		const user = result.rows[0];
-		
+
+		console.log({user});
+
 		if (!result) {
 			return res.status(404).send('User not found');
 		}
@@ -27,15 +28,16 @@ app.post('/api/login', async (req, res) => {
 			return res.status(401).send('Invalid credentials');
 		}
 
-		const accessToken = jwt.sign({ id: user.id, email: user.email }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1h' });
-		res.json({ accessToken, userId: user.id });
+		res.status(200).send({
+			user: result.rows[0],
+		});
 	} catch (err) {
 		console.error(err);
 		res.status(500).send('Server Error');
 	}
 });
 
-app.get('/api/users', authenticateToken, async (req, res) => {
+app.get('/api/users', async (req, res) => {
 	try {
 		const result = await pool.query('SELECT * FROM users');
 
@@ -51,7 +53,7 @@ app.get('/api/users', authenticateToken, async (req, res) => {
 	}
 });
 
-app.get('/api/users/:id',authenticateToken, async (req, res) => {
+app.get('/api/users/:id',async (req, res) => {
 	try {
 		const { id } = req.params;
 
@@ -97,7 +99,7 @@ app.post('/api/users', async (req, res) => {
 	}
 });
 
-app.put('/api/users/:id', authenticateToken, async (req, res) => {
+app.put('/api/users/:id', async (req, res) => {
 	try {
 		const { id } = req.params;
 		console.log({id});
@@ -116,7 +118,7 @@ app.put('/api/users/:id', authenticateToken, async (req, res) => {
 	}
 });
 
-app.delete('/api/users/:id', authenticateToken, async (req, res) => {
+app.delete('/api/users/:id', async (req, res) => {
 	try {
 		const { id } = req.params;
 
