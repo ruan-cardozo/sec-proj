@@ -8,7 +8,6 @@ function UserLoginForm() {
 		email: '',
 		password: ''
 	});
-	const [userMessage, setUserMessage] = useState('');
 	const navigate = useNavigate();
 
 	const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -18,10 +17,6 @@ function UserLoginForm() {
 
 	const handleSubmit = async (event: React.FormEvent) => {
 		event.preventDefault();
-		
-		setUserMessage(`Bem-vindo, ${formData.email}`);
-
-		console.log('aaa', userMessage);
 
 		try {
 			const response = await fetch('http://localhost:3000/api/login', {
@@ -37,7 +32,7 @@ function UserLoginForm() {
 				const data = await response.json();
 				localStorage.setItem('token', data.accessToken);
 				localStorage.setItem('userLogged', data.userId);
-				document.cookie = `token=${data.accessToken}; path=/; max-age=${60 * 60 * 24}`; //um dia de validade
+				document.cookie = `token=${data.accessToken}; path=/; max-age=${60 * 60 * 24}; Secure; SameSite=Stric;`;
 				setFormData({
 					email: '',
 					password: ''
@@ -82,9 +77,6 @@ function UserLoginForm() {
 					<button type="submit" className="btn-form">Login</button>
 				</form>
 			</div>
-
-			{/* Exibindo a mensagem de boas-vindas diretamente no DOM, sem sanitização */}
-			<div className="user-message" dangerouslySetInnerHTML={{ __html: userMessage }}></div>
             <button type='button' onClick={() => navigate('/update')} className="btn-login" > Ir para a tela de atualizar usuário</button>
 			<button type='button' onClick={() => navigate('/register')} className="btn-register" > Ir para registrar-se</button>
 		</div>
