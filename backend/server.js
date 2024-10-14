@@ -17,6 +17,7 @@ app.post('/api/login', async (req, res) => {
 	const { email, password } = req.body;
 
 	try {
+
 		const result = await pool.query(`SELECT * FROM users WHERE email = $1  and password = $2`, [email, password]);
 		const user = result.rows[0];
 		
@@ -61,13 +62,7 @@ app.get('/api/users/:id',authenticateToken, async (req, res) => {
 	try {
 		const { id } = req.params;
 
-		console.log({id});
-
-		const query = `SELECT * FROM users WHERE id = ${id}`;
-	
-		console.log({query});
-
-		const result = await pool.query(query);
+		const result = await pool.query(`SELECT * FROM users WHERE id = $1`, [id]);
 
 		if (!result) {
 
@@ -107,14 +102,13 @@ app.post('/api/users', async (req, res) => {
 app.put('/api/users/:id', authenticateToken, async (req, res) => {
 	try {
 		const { id } = req.params;
-		console.log({id});
 		const { email, name, password } = req.body;
 
-		const userQuery = `SELECT * FROM users WHERE id = ${id}`;
-		const databaseUser = await pool.query(userQuery);
+		const userQuery = `SELECT * FROM users WHERE id = $1`;
+		const databaseUser = await pool.query(userQuery, [id]);
 		const user = databaseUser.rows[0];
-		const userUpdateQuery = `UPDATE users SET name = '${name}', email = '${email}', password = '${password}' WHERE id = ${user.id} RETURNING *`;
-		const result = await pool.query(userUpdateQuery);
+		const userUpdateQuery = `UPDATE users SET name = $1, email = $2, password = $3 WHERE id = $4 RETURNING *`;
+		const result = await pool.query(userUpdateQuery, [name, email, password, user.id]);
 
 		res.json(result.rows[0]);
 	} catch (err) {
@@ -127,7 +121,7 @@ app.delete('/api/users/:id', authenticateToken, async (req, res) => {
 	try {
 		const { id } = req.params;
 
-		await pool.query(`DELETE FROM users WHERE id = ${id}`);
+		await pool.query(`DELETE FROM users WHERE id = $1`, [id]);
 
 		res.status(200).send('User deleted');
 	} catch (err) {
