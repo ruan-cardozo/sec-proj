@@ -5,6 +5,7 @@ import { UserController } from './src/core/modules/user-module/user-controller.m
 import { LoginController } from './src/core/modules/auth-module/login/login-controller.mjs';
 import { sequelize } from './src/config/db.mjs';
 import './src/core/models/UserModel.mjs';
+import { EmployeeController } from './src/core/modules/employee-module/employee-controller.mjs';
 
 class Server {
 	constructor() {
@@ -12,7 +13,7 @@ class Server {
 		this.config();
 		this.routes();
 		this.errorHandler();
-		this.syncTables();
+		this.app.use(this.interceptRequest);
 	}
 
 	config() {
@@ -33,16 +34,35 @@ class Server {
 	}
 
 	routes() {
+		this.userRoutes();
+		this.loginRoutes();
+		this.employeeRoutes();
+	}
 
+	userRoutes() {
 		const userController = UserController.getInstance();
-		const loginController = LoginController.getInstance();
 
 		this.app.get('/api/users', authenticateToken, userController.getAllUsers);
 		this.app.get('/api/users/:id', authenticateToken, userController.getUserById);
 		this.app.post('/api/users', userController.createUser);
 		this.app.put('/api/users/:id', authenticateToken, userController.updateUser);
 		this.app.delete('/api/users/:id', authenticateToken, userController.deleteUser);
+	}
+
+	loginRoutes() {
+		const loginController = LoginController.getInstance();
+
 		this.app.post('/api/login', loginController.login);
+	}
+
+	employeeRoutes() {
+		const employeeController = EmployeeController.getInstance();
+
+		this.app.post('/api/employees', authenticateToken, employeeController.createEmployee);
+		this.app.get('/api/employees', authenticateToken, employeeController.getAllEmployees);
+		this.app.get('/api/employees/:id', authenticateToken, employeeController.getOneEmployee);
+		this.app.put('/api/employees/:id', authenticateToken, employeeController.updateEmployee);
+		this.app.delete('/api/employees/:id', authenticateToken, employeeController.deleteEmployee);
 	}
 
 	errorHandler() {
@@ -60,7 +80,7 @@ class Server {
 
 	interceptRequest(req, res, next) {
 		console.log('Request intercepted');
-		console.log('Request for ' + req.url);
+		console.log('Request for ' + req);
 		next();
 	}
 }
