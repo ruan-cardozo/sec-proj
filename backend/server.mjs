@@ -15,12 +15,12 @@ class Server {
 		this.routes();
 		this.errorHandler();
 		this.app.use(this.interceptRequest);
-		this.syncTables();
+		// this.syncTables();
 	}
 
 	config() {
 		const corsOptions = {
-			origin: 'http://localhost:5173',
+			origin: ['http://localhost:5173', 'http://172.21.0.7:5173'],
 			credentials: true
 		}
 
@@ -84,8 +84,7 @@ class Server {
 	}
 
 	interceptRequest(req, res, next) {
-		console.log('Request intercepted');
-		console.log('Request for ' + req);
+		console.log(`${req.method} ${req.url}`);
 		next();
 	}
 }

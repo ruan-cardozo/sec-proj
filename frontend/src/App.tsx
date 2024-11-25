@@ -2,23 +2,27 @@ import UserRegisterForm from './components/UserRegisterForm/UserRegisterForm'
 import './App.css';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import HomePageButton from './components/HomePageButton/HomePageButton';
-import HeaderTitle from './components/HeaderTitle/HeaderTitle';
 import UserLoginForm from './components/UserLoginForm/UserLoginForm';
-import UpdateUserForm from './components/UpdateUserForm/UpdateUserForm';
+import { AuthProvider } from './context/AuthContext';
+import HomePage from './pages/HomePage';
+import ProtectedRoute from './routes/ProtectedRoute';
 
 function App() {
 
   return (
     <>
-    <HeaderTitle/>
-    <Router>
-        <HomePageButton />
-        <Routes>
-          <Route path="/register" element={<UserRegisterForm />} />
-          <Route path="/login" element={<UserLoginForm />} />
-          <Route path="/update" element={<UpdateUserForm />} />
-        </Routes>
-      </Router>
+      <AuthProvider>
+        <Router>
+            <HomePageButton />
+            <Routes>
+              <Route path="/register" element={<UserRegisterForm />} />
+              <Route path="/login" element={<UserLoginForm />} />
+              <Route element={<ProtectedRoute />}>
+                        <Route path="/home" element={<HomePage />} />
+              </Route>
+            </Routes>
+        </Router>
+      </AuthProvider>
     </>
   )
 }
