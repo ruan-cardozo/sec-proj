@@ -22,7 +22,7 @@ docker network create cyber-sec
 
 1. Buildar e subir o container dos banco de dados com o seguinte comando:
 ```bash
-docker compose -f docker-compose-database.yml --env-file .env up --build
+docker compose -f docker-compose-database.yml --env-file ../backend/src/common/env/.env up --build
 ```
 
 2. Quando tiver com o container executar o docker comando:

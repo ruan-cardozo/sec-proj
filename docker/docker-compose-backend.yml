@@ -2,10 +2,10 @@ services:
   backend:
     container_name: backend
     build:
-     context: ./backend
+     context: ../backend
      dockerfile: Dockerfile
     env_file:
-      - ./backend/.env
+      - ../backend/src/common/env/.env
     ports:
       - "3000:3000"
     volumes:

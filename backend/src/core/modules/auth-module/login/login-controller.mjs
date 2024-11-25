@@ -1,50 +1,32 @@
-import { pool } from '../../../../config/db.mjs';
-import bcrypt from 'bcrypt';
-import jwt from 'jsonwebtoken';
+import { LoginService } from './login-service.mjs';
 
 export class LoginController {
 
-  static #instance;
+	static #instance;
+	#loginService;
 
-  static getInstance() {
+	get loginService() {
 
-    if (!LoginController.#instance) {
-  
-      LoginController.#instance = new LoginController();
-    }
-  
-    return LoginController.#instance;
-  }
+		if (!this.#loginService) {
 
-  async login(req, res) {
-    const { email, password } = req.body;
+			this.#loginService = LoginService.getInstance();
+		}
+		
+		return this.#loginService;
+	}
 
-    try {
-      const result = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
-      const user = result.rows[0];
-      console.log({ user });
+	static getInstance() {
 
-      if (!user) {
-        return res.status(404).send('User not found');
-      }
+		if (!LoginController.#instance) {
+	
+			LoginController.#instance = new LoginController();
+		}
+	
+		return LoginController.#instance;
+	}
 
-      const userIsValid = await bcrypt.compare(password, user.password);
-      console.log({ userIsValid });
+	async login(req, res) {
 
-      if (userIsValid) {
-        const accessToken = jwt.sign(
-          { id: user.id, email: user.email },
-          process.env.ACCESS_TOKEN_SECRET,
-          { expiresIn: '1h' }
-        );
-
-        return res.json({ accessToken, userId: user.id });
-      } else {
-        return res.status(401).send('Invalid credentials');
-      }
-    } catch (err) {
-      console.error(err);
-      res.status(500).send('Server Error');
-    }
-  }
+		return this.loginService.login(req, res);
+	}
 }
