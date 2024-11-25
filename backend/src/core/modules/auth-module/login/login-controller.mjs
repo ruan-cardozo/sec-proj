@@ -7,7 +7,9 @@ export class LoginController {
 
 	constructor() {
 		this.#loginService = LoginService.getInstance();
-		this.login = this.login.bind(this); 
+		['login', 'checkToken'].forEach(method => {
+			this[method] = this[method].bind(this);
+		});
 	}
 
 	get loginService() {
@@ -28,5 +30,10 @@ export class LoginController {
 	async login(req, res) {
 
 		return this.loginService.login(req, res);
+	}
+
+	async checkToken(req, res) {
+		
+		return this.loginService.checkToken(req, res);
 	}
 }

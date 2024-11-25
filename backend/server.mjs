@@ -6,6 +6,7 @@ import { LoginController } from './src/core/modules/auth-module/login/login-cont
 import { sequelize } from './src/config/db.mjs';
 import './src/core/models/UserModel.mjs';
 import { EmployeeController } from './src/core/modules/employee-module/employee-controller.mjs';
+import cookieParser from 'cookie-parser';
 
 class Server {
 	constructor() {
@@ -25,6 +26,7 @@ class Server {
 
 		this.app.use(cors(corsOptions));
 		this.app.use(express.json());
+		this.app.use(cookieParser())
 	}
 
 	syncTables() {
@@ -55,6 +57,7 @@ class Server {
 		const loginController = LoginController.getInstance();
 
 		this.app.post('/api/login', loginController.login);
+		this.app.get('/api/check-token', authenticateToken, loginController.checkToken);
 	}
 
 	employeeRoutes() {

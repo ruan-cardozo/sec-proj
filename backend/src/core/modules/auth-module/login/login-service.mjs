@@ -38,7 +38,7 @@ export class LoginService {
                     { expiresIn: '8h' }
                 );
 
-                res.cookie('authToken', accessToken, { httpOnly: true,  sameSite: 'strict', secure: true, expiresIn: 60 * 60 * 8 * 1000 });
+                res.cookie('token', accessToken, { httpOnly: true,  sameSite: 'strict', secure: true, expiresIn: 60 * 60 * 8 * 1000 });
                 res.cookie('userId', user.id, { httpOnly: true,  sameSite: 'strict', secure: true, expiresIn: 60 * 60 * 8 * 1000 });
                 return res.json({ accessToken, userId: user.id });
             } else {
@@ -47,6 +47,23 @@ export class LoginService {
         } catch (err) {
             console.error(err);
             res.status(500).send('Server Error');
+        }
+    }
+
+    async checkToken(req, res) {
+
+        const token = req.cookies.token;
+
+        if (!token) {
+            return res.status(401).send('Access Denied');
+        }
+
+        try {
+            const verified = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+            req.user = verified;
+            res.status(200).json({ message: 'Authenticated', user: req.user });
+        } catch (err) {
+            res.status(400).send('Invalid Token');
         }
     }
 }
