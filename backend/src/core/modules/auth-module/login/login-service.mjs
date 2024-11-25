@@ -35,9 +35,11 @@ export class LoginService {
                 const accessToken = jwt.sign(
                     { id: user.id, email: user.email },
                     process.env.ACCESS_TOKEN_SECRET,
-                    { expiresIn: '1h' }
+                    { expiresIn: '8h' }
                 );
 
+                res.cookie('authToken', accessToken, { httpOnly: true,  sameSite: 'strict', secure: true, expiresIn: 60 * 60 * 8 * 1000 });
+                res.cookie('userId', user.id, { httpOnly: true,  sameSite: 'strict', secure: true, expiresIn: 60 * 60 * 8 * 1000 });
                 return res.json({ accessToken, userId: user.id });
             } else {
                 return res.status(401).send('Invalid credentials');
