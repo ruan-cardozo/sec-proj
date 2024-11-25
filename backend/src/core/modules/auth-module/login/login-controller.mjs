@@ -5,23 +5,23 @@ export class LoginController {
 	static #instance;
 	#loginService;
 
+	constructor() {
+		this.#loginService = LoginService.getInstance();
+		this.login = this.login.bind(this); 
+	}
+
 	get loginService() {
 
-		if (!this.#loginService) {
-
-			this.#loginService = LoginService.getInstance();
-		}
-		
 		return this.#loginService;
 	}
 
 	static getInstance() {
 
 		if (!LoginController.#instance) {
-	
+
 			LoginController.#instance = new LoginController();
 		}
-	
+
 		return LoginController.#instance;
 	}
 

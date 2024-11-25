@@ -1,9 +1,21 @@
-import { MongoDB } from '../../../config/mongo.mjs';
-import mongoose from 'mongoose';
+import { EmployeeService } from './employee-service.mjs';
 
 export class EmployeeController {
 
     static #instance;
+    #employeeService;
+
+    constructor() {
+        this.#employeeService = EmployeeService.getInstance();
+        ['getAllEmployees', 'getOneEmployee', 'createEmployee', 'updateEmployee', 'deleteEmployee'].forEach(method => {
+            this[method] = this[method].bind(this);
+        });
+    }
+    
+    get employeeService() {
+
+        return this.#employeeService;
+    }
 
     static getInstance() {
         
@@ -16,86 +28,27 @@ export class EmployeeController {
     }
 
     async getAllEmployees(req, res) {
-        try {
-            const mongo = MongoDB.getInstance();
-            mongo.connect();
-            const db = mongoose.connection;
-            const collection = db.collection('employees');
-            const result = await collection.find().toArray();
-            res.json(result);
-        } catch (error) {
-            res.status(500).json({ message: 'Houve um erro ao buscar os colaboradores', error });
-        }
+
+       return this.employeeService.getAllEmployees(req, res);
     }
 
     async getOneEmployee(req, res) {
-        try {
-            const { id } = req.params;
-            console.log(req.params);
-            const mongo = MongoDB.getInstance();
-            mongo.connect();
-            const db = mongoose.connection;
-            const collection = db.collection('employees');
-            const result = await collection.findOne({ _id: new mongoose.Types.ObjectId(id) });
-            res.json(result);
-        } catch (error) {
-            res.status(500).json({ message: 'Houve um erro ao buscar o colaborador', error });
-        }
+       
+        return this.employeeService.getOneEmployee(req, res);
     }
 
     async createEmployee(req, res) {
 
-        try {
-            const { name, position, department, salary, hireDate } = req.body;
-            const mongo = MongoDB.getInstance();
-            mongo.connect();
-            const db = mongoose.connection;
-            const collection = db.collection('employees');
-            const result = await collection.insertOne({ name, position, department, salary, hireDate });
-            res.status(201).json({ message: 'Colaborador criado com sucesso', employeeId: result.insertedId });
-        } catch (error) {
-            res.status(500).json({ message: 'Houve um erro ao criar o colaborador', error });
-        }
+       return this.employeeService.createEmployee(req, res);
     }
 
     async updateEmployee(req, res) {
-        try {
-            const { id } = req.params;
-            const { name, position, department, salary, hireDate } = req.body;
-            const mongo = MongoDB.getInstance();
-            mongo.connect();
-            const db = mongoose.connection;
-            const collection = db.collection('employees');
-            const result = await collection.updateOne({ _id: new mongoose.Types.ObjectId(id) }, { $set: { name, position, department, salary, hireDate } });
-
-            if (result.acknowledged) {
-
-                const updatedEmployee = await collection.findOne({ _id: new mongoose.Types.ObjectId(id) });
-                res.json({ message: 'Colaborador atualizado com sucesso', employee: updatedEmployee });
-            }
-
-        } catch (error) {
-            res.status(500).json({ message: 'Houve um erro ao atualizar o colaborador', error });
-        }
+        
+        return this.employeeService.updateEmployee(req, res);
     }
 
     async deleteEmployee(req, res) {
-        try {
-            const { id } = req.params;
-            const mongo = MongoDB.getInstance();
-            mongo.connect();
-            const db = mongoose.connection;
-            const collection = db.collection('employees');
-            const result = await collection.deleteOne({ _id: new mongoose.Types.ObjectId(id) });
-
-            if (result.deletedCount) {
-                res.json({ message: 'Colaborador deletado com sucesso' });
-            } else {
-                res.status(404).json({ message: 'Colaborador não encontrado' });
-            }
-
-        } catch (error) {
-            res.status(500).json({ message: 'Houve um erro ao deletar o colaborador', error });
-        }
+        
+        return this.employeeService.deleteEmployee(req, res);
     }
 }

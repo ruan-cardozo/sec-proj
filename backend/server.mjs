@@ -14,6 +14,7 @@ class Server {
 		this.routes();
 		this.errorHandler();
 		this.app.use(this.interceptRequest);
+		this.syncTables();
 	}
 
 	config() {

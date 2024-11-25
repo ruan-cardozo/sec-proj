@@ -8,20 +8,18 @@ export class LoginService {
 
     static getInstance() {
             
-            if (!LoginService.#instance) {
+        if (!LoginService.#instance) {
     
-                LoginService.#instance = new LoginService();
-            }
+            LoginService.#instance = new LoginService();
+        }
     
-            return LoginService.#instance;
+        return LoginService.#instance;
     }
 
-    async login() {
-
-        const { email, password } = req.body;
-
+    async login(req, res) {
+       
         try {
-
+            const { email, password } = req.body;
             const result = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
             const user = result.rows[0];
 
