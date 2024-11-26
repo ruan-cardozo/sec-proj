@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, ReactNode, useEffect } from 'react';
+import Cookies from 'js-cookie';
 import { login as apiLogin } from '../api/auth';
 import axiosInstance from '../api/axiosConfig';
 
@@ -14,21 +15,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
 
     useEffect(() => {
-        const checkAuth = async () => {
-            try {
-                const response = await  fetch('http://localhost:3000/api/check-token', {
-                    method: 'GET',
-                    credentials: 'include'
-                });
-                if (response.status === 200) {
-                    setIsAuthenticated(true);
-                }
-            } catch (error) {
-                setIsAuthenticated(false);
-            }
-        };
-
-        checkAuth();
+        const token = Cookies.get('token');
+        if (token) {
+            setIsAuthenticated(true);
+        }
     }, []);
 
     const login = async (email: string, password: string) => {

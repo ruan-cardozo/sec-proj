@@ -2,6 +2,14 @@ import * as React from 'react';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import Box from '@mui/material/Box';
+import { DataGrid, GridColDef } from '@mui/x-data-grid';
+import Paper from '@mui/material/Paper';
+import Button from '@mui/material/Button';
+import { createEmployee, deleteEmployee, getEmployees, updateEmployee } from '../api/employee';
+import IconButton from '@mui/material/IconButton';
+import DeleteIcon from '@mui/icons-material/Delete';
+import PencilIcon from '@mui/icons-material/Edit';
+import { Alert, Modal, Snackbar, TextField } from '@mui/material';
 
 interface TabPanelProps {
     children?: React.ReactNode;
@@ -19,8 +27,9 @@ function CustomTabPanel(props: TabPanelProps) {
             id={`simple-tabpanel-${index}`}
             aria-labelledby={`simple-tab-${index}`}
             {...other}
+            style={{ height: '100%' }}
         >
-            {value === index && <Box sx={{ p: 3, color: 'white' }}>{children}</Box>}
+            {value === index && <Box sx={{ p: 3, color: 'gray', height: '100%' }}>{children}</Box>}
         </div>
     );
 }
@@ -40,16 +49,55 @@ export default function HomePage() {
     };
 
     return (
-        <Box sx={{ width: '100%' }}>
+        <>
+        <p style={
+            {
+                marginTop: '-1%',
+				color: 'white',
+				fontWeight: '500',
+				fontSize: '30px'
+            }
+        }>Bem vindo ao sistema de relatórios de horas mensais</p>
+        <Box sx={{ width: '100%', height: '100%' }}>
             <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
                 <Tabs value={value} onChange={handleChange} aria-label="basic tabs example">
-                    <Tab label="Item One" {...a11yProps(0)} sx={{ color: 'white' }} />
-                    <Tab label="Item Two" {...a11yProps(1)} sx={{ color: 'white' }} />
-                    <Tab label="Item Three" {...a11yProps(2)} sx={{ color: 'white' }} />
+                    <Tab
+                        label="Colaboradores"
+                        {...a11yProps(0)}
+                        sx={{
+                            color: value === 0 ? 'white' : 'white', // Cor do texto
+                            backgroundColor: value === 0 ? 'white' : 'transparent', // Cor de fundo
+                            '&:hover': {
+                                backgroundColor: value === 0 ? 'white' : 'transparent', // Cor ao passar o mouse
+                            },
+                        }}
+                    />
+                    <Tab
+                        label="Relatórios"
+                        {...a11yProps(1)}
+                        sx={{
+                            color: value === 1 ? 'white' : 'white', // Cor do texto
+                            backgroundColor: value === 1 ? 'white' : 'transparent', // Cor de fundo
+                            '&:hover': {
+                                backgroundColor: value === 1 ? 'white' : 'transparent', // Cor ao passar o mouse
+                            },
+                        }}
+                    />
+                    <Tab
+                        label="Cadastrar pontos"
+                        {...a11yProps(2)}
+                        sx={{
+                            color: value === 2 ? 'white' : 'white', // Cor do texto
+                            backgroundColor: value === 2 ? 'white' : 'transparent', // Cor de fundo
+                            '&:hover': {
+                                backgroundColor: value === 2 ? 'white' : 'transparent', // Cor ao passar o mouse
+                            },
+                        }}
+                    />
                 </Tabs>
             </Box>
             <CustomTabPanel value={value} index={0}>
-                Item One
+                <EmployeeList />
             </CustomTabPanel>
             <CustomTabPanel value={value} index={1}>
                 Item Two
@@ -57,6 +105,235 @@ export default function HomePage() {
             <CustomTabPanel value={value} index={2}>
                 Item Three
             </CustomTabPanel>
+            </Box>
+        </>
+        
+    );
+}
+
+function EmployeeList() {
+    const [rows, setRows] = React.useState<{ id: string; name: string; position: string; department: string; salary: number; hireDate: string }[]>([]);
+    const [open, setOpen] = React.useState(false);
+    const [isEditing, setIsEditing] = React.useState(false);
+    const [newEmployee, setNewEmployee] = React.useState({ id: '', name: '', position: '', department: '', salary: '', hireDate: '' });
+    const [snackbar, setSnackbar] = React.useState<{ open: boolean; message: string; severity: 'success' | 'error' }>({ open: false, message: '', severity: 'success' });
+
+    React.useEffect(() => {
+        fetchEmployees();
+    }, []);
+
+    const fetchEmployees = async () => {
+        try {
+            const response = await getEmployees();
+            if (response && response.ok) {
+                const employees = await response.json();
+                const mappedEmployees = employees.map((employee: any) => ({
+                    id: employee._id,
+                    name: employee.name,
+                    position: employee.position,
+                    department: employee.department,
+                    salary: employee.salary,
+                    hireDate: new Date(employee.hireDate).toLocaleDateString('pt-BR', {
+                        day: '2-digit',
+                        month: '2-digit',
+                        year: 'numeric',
+                    }),
+                }));
+                setRows(mappedEmployees);
+            } else {
+                console.error('Failed to fetch employees');
+            }
+        } catch (error) {
+            console.error('Error fetching employees:', error);
+        }
+    };
+
+    const handleDelete = async (id: string) => {
+        try {
+            const response = await deleteEmployee(id);
+
+            if (!response) {
+                setSnackbar({ open: true, message: 'Failed to delete employee', severity: 'error' });
+                return;
+            }
+
+            const getEmployeesResponse = await getEmployees();
+
+            const employees = getEmployeesResponse ? await getEmployeesResponse.json() : [];
+
+            const mappedEmployees = employees.map((employee: any) => ({
+                id: employee._id,
+                name: employee.name,
+                position: employee.position,
+                department: employee.department,
+                salary: employee.salary,
+                hireDate: new Date(employee.hireDate).toLocaleDateString('pt-BR', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric',
+                }),
+            }));
+
+            setRows(mappedEmployees);
+
+            setRows(rows.filter((row: { id: string }) => row.id !== id));
+            setSnackbar({ open: true, message: 'Employee deleted successfully', severity: 'success' });
+        } catch (error) {
+            console.error('Error deleting employee:', error);
+            setSnackbar({ open: true, message: 'Error deleting employee', severity: 'error' });
+        }
+    };
+
+    const handleSaveEmployee = async () => {
+        try {
+            const payload = {
+                id: newEmployee.id ?? '',
+                name: newEmployee.name,
+                position: newEmployee.position,
+                department: newEmployee.department,
+                salary: parseFloat(newEmployee.salary),
+                hireDate: new Date(newEmployee.hireDate).toISOString(),
+            };
+
+            let response;
+            if (isEditing) {
+                response = await updateEmployee(payload);
+            } else {
+                response = await createEmployee(payload);
+            }
+
+            if (response && response.ok) {
+                fetchEmployees();
+                handleClose();
+                setSnackbar({ open: true, message: isEditing ? 'Employee updated successfully' : 'Employee added successfully', severity: 'success' });
+            } else {
+                console.error('Failed to save employee');
+                setSnackbar({ open: true, message: 'Failed to save employee', severity: 'error' });
+            }
+        } catch (error) {
+            console.error('Error saving employee:', error);
+            setSnackbar({ open: true, message: 'Error saving employee', severity: 'error' });
+        }
+    };
+
+    const parseDate = (dateString: string) => {
+        const [day, month, year] = dateString.split('/').map(Number);
+        return new Date(year, month - 1, day);
+    };
+
+    const handleEdit = (id: string) => {
+        console.log('handleEdit called with id:', id); // Log for debugging
+        const employeeToEdit = rows.find((row) => row.id === id);
+        if (employeeToEdit) {
+            console.log('Employee to edit found:', employeeToEdit); // Log for debugging
+            const hireDate = parseDate(employeeToEdit.hireDate);
+            if (isNaN(hireDate.getTime())) {
+                console.error('Invalid hire date:', employeeToEdit.hireDate);
+                setSnackbar({ open: true, message: 'Invalid hire date', severity: 'error' });
+                return;
+            }
+            setNewEmployee({
+                id: employeeToEdit.id,
+                name: employeeToEdit.name,
+                position: employeeToEdit.position,
+                department: employeeToEdit.department,
+                salary: employeeToEdit.salary.toString(),
+                hireDate: hireDate.toISOString().split('T')[0],
+            });
+            setIsEditing(true);
+            setOpen(true);
+        } else {
+            console.log('Employee to edit not found'); // Log for debugging
+        }
+    };
+
+    const handleOpen = () => {
+        setNewEmployee({ id: '', name: '', position: '', department: '', salary: '', hireDate: '' });
+        setIsEditing(false);
+        setOpen(true);
+    };
+
+    const handleClose = () => setOpen(false);
+
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const { name, value } = e.target;
+        setNewEmployee((prev) => ({ ...prev, [name]: value }));
+    };
+
+    const handleCloseSnackbar = () => {
+        setSnackbar({ ...snackbar, open: false });
+    };
+
+    const columns: GridColDef[] = [
+        { field: 'name', headerName: 'Nome', width: 200 },
+        { field: 'position', headerName: 'Cargo', width: 200 },
+        { field: 'department', headerName: 'Departamento', width: 200 },
+        { field: 'salary', headerName: 'Salário', type: 'number', width: 130 },
+        { field: 'hireDate', headerName: 'Data de contratação', width: 150 },
+        {
+            field: 'actions',
+            headerName: 'Ações',
+            width: 100,
+            renderCell: (params) => (
+                <>
+                    <IconButton onClick={() => handleDelete(params.row.id)} color="inherit">
+                        <DeleteIcon />
+                    </IconButton>
+                    <IconButton onClick={() => handleEdit(params.row.id)} color="inherit">
+                        <PencilIcon />
+                    </IconButton>
+                </>
+            ),
+        },
+    ];
+
+    return (
+        <Box sx={{ height: 'calc(100vh - 48px)', width: '100%' }}>
+            <Paper sx={{ height: '100%', width: '100%' }}>
+                <DataGrid
+                    rows={rows}
+                    columns={columns}
+                    pageSizeOptions={[5, 10]}
+                    checkboxSelection
+                    sx={{ border: 0 }}
+                />
+            </Paper>
+            <Box sx={{ display: 'flex', justifyContent: 'flex-end', p: 2 }}>
+                <Button variant="contained" color="inherit" onClick={handleOpen} sx={{ color: 'black' }}>
+                    Adicionar Colaborador
+                </Button>
+            </Box>
+            <Modal open={open} onClose={handleClose}>
+                <Box sx={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: 400, bgcolor: 'background.paper', boxShadow: 24, p: 4 }}>
+                    <h2>{isEditing ? 'Editar Colaborador' : 'Adicionar Colaborador'}</h2>
+                    <TextField label="Nome" name="name" fullWidth margin="normal" value={newEmployee.name} onChange={handleChange} />
+                    <TextField label="Cargo" name="position" fullWidth margin="normal" value={newEmployee.position} onChange={handleChange} />
+                    <TextField label="Departamento" name="department" fullWidth margin="normal" value={newEmployee.department} onChange={handleChange} />
+                    <TextField label="Salário" name="salary" fullWidth margin="normal" value={newEmployee.salary} onChange={handleChange} />
+                    <TextField
+                        label="Data de contratação"
+                        name="hireDate"
+                        type="date"
+                        fullWidth
+                        margin="normal"
+                        value={newEmployee.hireDate}
+                        onChange={handleChange}
+                        InputLabelProps={{
+                            shrink: true,
+                        }}
+                    />
+                    <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>
+                        <Button variant="contained" color="inherit" sx={{ color: 'black' }} onClick={handleSaveEmployee}>
+                            {isEditing ? 'Salvar' : 'Adicionar'}
+                        </Button>
+                    </Box>
+                </Box>
+            </Modal>
+            <Snackbar open={snackbar.open} autoHideDuration={6000} onClose={handleCloseSnackbar}>
+                <Alert onClose={handleCloseSnackbar} severity={snackbar.severity} sx={{ width: '100%' }}>
+                    {snackbar.message}
+                </Alert>
+            </Snackbar>
         </Box>
     );
 }
