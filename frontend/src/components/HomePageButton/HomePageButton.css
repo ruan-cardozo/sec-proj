@@ -15,13 +15,13 @@
     text-transform: uppercase;
     transition: 0.5s;
     background-size: 200% auto;
-    color: white;
+    color: black;
     border-radius: 10px;
     display: block;
     border: 0px;
     font-weight: 700;
     box-shadow: 0px 0px 14px -7px black;
-    background-image: linear-gradient(45deg, rgba(2,0,36,1) 0%, rgba(0,61,255,1)  51%, rgba(0,212,255,1)  100%);
+    background-image: black;
     cursor: pointer;
     user-select: none;
     -webkit-user-select: none;
@@ -32,7 +32,7 @@
   
   .btn-home:hover {
     background-position: right center;
-    color: #fff;
+    color: #707070;
     text-decoration: none;
   }
   
