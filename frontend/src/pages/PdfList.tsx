@@ -34,6 +34,7 @@ const PdfList: React.FC = () => {
     const [snackbarOpen, setSnackbarOpen] = useState(false);
     const [snackbarMessage, setSnackbarMessage] = useState('');
     const [snackbarSeverity, setSnackbarSeverity] = useState<'success' | 'error'>('success');
+    const [email, setEmail] = useState('');
 
     useEffect(() => {
         const fetchPdfs = async () => {
@@ -189,8 +190,24 @@ const PdfList: React.FC = () => {
     };
 
     const handleSendEmail = (pdfId: string) => {
-        // Lógica para enviar o PDF por e-mail
-        console.log('PDF enviado por e-mail:', pdfId);
+
+        try {
+            fetch(`http://localhost:3000/api/email`, {
+                headers: {
+                    'Authorization': 'Bearer ' + Cookies.get('token'),
+                    'Content-Type': 'application/json'
+                },
+                method: 'POST',
+                body: JSON.stringify({ to: email }),
+            });
+
+            const pdfName = pdfs.find(pdf => pdf._id === pdfId)?.name;
+
+            setSnackbarMessage(`E-mail enviado com sucesso para o documento ${pdfName}`);
+        } catch (error) {
+            setSnackbarMessage((error as Error).message);
+            setSnackbarSeverity('error');
+        }
     };
 
     return (
@@ -203,7 +220,7 @@ const PdfList: React.FC = () => {
                         <StyledButton variant="contained" color="primary" onClick={() => handleDownload(pdf._id, pdf.name)}>Download</StyledButton>
                         <StyledButton variant="contained" color="secondary" onClick={() => handleOpen(pdf)}>Assinar</StyledButton>
                         <StyledButton variant="contained" onClick={() => handleViewPDF(pdf._id)}>Visualizar</StyledButton>
-                        <StyledButton variant="contained" onClick={() => handleSendEmail(pdf._id)}>Encaminhar para o e-mail</StyledButton>
+                        <StyledButton variant="contained" data-pdfid={pdf._id} onClick={() => handleOpen(pdf)}>Notificar por e-mail</StyledButton>
                         <StyledButton variant="contained" onClick={() => handleDelete(pdf._id)}>Apagar PDF</StyledButton>
                     </StyledListItem>
                 ))}
@@ -227,6 +244,33 @@ const PdfList: React.FC = () => {
                             style={{ border: 'none' }}
                         ></iframe>
                     )}
+                </Box>
+            </Modal>
+            {/* Modal para selecionar o email do destinatário */}
+            <Modal open={open} onClose={handleClose}>
+                <Box sx={{ 
+                    position: 'absolute', 
+                    top: '50%', 
+                    left: '50%', 
+                    transform: 'translate(-50%, -50%)', 
+                    width: 400, 
+                    bgcolor: 'background.paper', 
+                    border: '2px solid #000', 
+                    boxShadow: 24, 
+                    p: 4 
+                }}>
+                    <h2>Enviar PDF por Email</h2>
+                    <TextField
+                        label="Email do Destinatário"
+                        variant="outlined"
+                        fullWidth
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        margin="normal"
+                    />
+                    <Button variant="contained" color="primary" onClick={handleSendEmail}>
+                        Enviar
+                    </Button>
                 </Box>
             </Modal>
             <Snackbar open={snackbarOpen} autoHideDuration={6000} onClose={handleSnackbarClose}>
