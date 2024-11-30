@@ -9,7 +9,7 @@ import { EmployeeController } from './src/core/modules/employee-module/employee-
 import cookieParser from 'cookie-parser';
 import fileUpload from 'express-fileupload';
 import { ReportController } from './src/core/modules/report-module/report-controller.mjs';
-
+import { EmailController } from './src/core/modules/email-module/email-controller.mjs';
 class Server {
 	constructor() {
 		this.app = express();
@@ -46,6 +46,7 @@ class Server {
 		this.loginRoutes();
 		this.employeeRoutes();
 		this.pdfRoutes();
+		this.emailRoutes();
 	}
 
 	userRoutes() {
@@ -82,6 +83,12 @@ class Server {
 		this.app.get('/api/reports', authenticateToken, reportController.getAllReports);
 		this.app.get('/api/reports/:id', authenticateToken, reportController.getOneReport);
 		this.app.delete('/api/reports/:id', authenticateToken, reportController.deleteReport);
+	}
+
+	emailRoutes() {
+		const emailController = EmailController.getInstance();
+
+		this.app.post('/api/email', authenticateToken, emailController.sendEmail);
 	}
 
 	errorHandler() {
