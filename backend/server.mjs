@@ -7,6 +7,8 @@ import { sequelize } from './src/config/db.mjs';
 import './src/core/models/UserModel.mjs';
 import { EmployeeController } from './src/core/modules/employee-module/employee-controller.mjs';
 import cookieParser from 'cookie-parser';
+import fileUpload from 'express-fileupload';
+import { ReportController } from './src/core/modules/report-module/report-controller.mjs';
 
 class Server {
 	constructor() {
@@ -23,10 +25,12 @@ class Server {
 			origin: ['http://localhost:5173', 'http://172.21.0.7:5173'],
 			credentials: true
 		}
-
-		this.app.use(cors(corsOptions));
+		this.app.use(cors());
 		this.app.use(express.json());
-		this.app.use(cookieParser())
+		this.app.use(cookieParser());
+		this.app.use(fileUpload({
+			logger: console.log
+		}));
 	}
 
 	syncTables() {
@@ -41,6 +45,7 @@ class Server {
 		this.userRoutes();
 		this.loginRoutes();
 		this.employeeRoutes();
+		this.pdfRoutes();
 	}
 
 	userRoutes() {
@@ -68,6 +73,15 @@ class Server {
 		this.app.get('/api/employees/:id', authenticateToken, employeeController.getOneEmployee);
 		this.app.put('/api/employees/:id', authenticateToken, employeeController.updateEmployee);
 		this.app.delete('/api/employees/:id', authenticateToken, employeeController.deleteEmployee);
+	}
+
+	pdfRoutes() {
+		const reportController = ReportController.getInstance();
+
+		this.app.post('/api/reports', authenticateToken, reportController.createReport);
+		this.app.get('/api/reports', authenticateToken, reportController.getAllReports);
+		this.app.get('/api/reports/:id', authenticateToken, reportController.getOneReport);
+		this.app.delete('/api/reports/:id', authenticateToken, reportController.deleteReport);
 	}
 
 	errorHandler() {

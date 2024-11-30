@@ -23,6 +23,10 @@ const employeeSchema = new mongoose.Schema({
     hireDate: {
         type: Date,
         default: Date.now
+    },
+    hours_worked_per_week: {
+        type: Number,
+        required: true
     }
 });
 

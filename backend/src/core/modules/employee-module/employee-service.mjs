@@ -44,14 +44,15 @@ export class EmployeeService {
     }
 
     async createEmployee(req, res) {
-
+        console.log(req.body);
+        
         try {
-            const { name, position, department, salary, hireDate } = req.body;
+            const { name, position, department, salary, hireDate, hours_worked_per_week } = req.body;
             const mongo = MongoDB.getInstance();
             mongo.connect();
             const db = mongoose.connection;
             const collection = db.collection('employees');
-            const result = await collection.insertOne({ name, position, department, salary, hireDate });
+            const result = await collection.insertOne({ name, position, department, salary, hireDate, hours_worked_per_week});
             res.status(201).json({ message: 'Colaborador criado com sucesso', employeeId: result.insertedId });
         } catch (error) {
             res.status(500).json({ message: 'Houve um erro ao criar o colaborador', error });
@@ -59,14 +60,16 @@ export class EmployeeService {
     }
 
     async updateEmployee(req, res) {
+        console.log(req.body);
+
         try {
             const { id } = req.params;
-            const { name, position, department, salary, hireDate } = req.body;
+            const { name, position, department, salary, hireDate, hours_worked_per_week } = req.body;
             const mongo = MongoDB.getInstance();
             mongo.connect();
             const db = mongoose.connection;
             const collection = db.collection('employees');
-            const result = await collection.updateOne({ _id: new mongoose.Types.ObjectId(id) }, { $set: { name, position, department, salary, hireDate } });
+            const result = await collection.updateOne({ _id: new mongoose.Types.ObjectId(id) }, { $set: { name, position, department, salary, hireDate, hours_worked_per_week } });
 
             if (result.acknowledged) {
 
