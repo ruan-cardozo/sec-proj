@@ -31,7 +31,8 @@ export const getEmployees = async () => {
 
 export const createEmployee = async (employee: Employee) => {
     const url = 'http://localhost:3000/api/employees';
-
+    console.log(employee);
+    
     try {
         const response = await fetch(url, {
             method: 'POST',
@@ -50,7 +51,8 @@ export const createEmployee = async (employee: Employee) => {
 
 export const updateEmployee = async (employee: Employee) => {
     const url = 'http://localhost:3000/api/employees/' + employee.id;
-
+    console.log(employee);
+    
     try {
         const response = await fetch(url, {
             method: 'PUT',

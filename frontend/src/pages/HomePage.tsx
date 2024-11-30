@@ -9,7 +9,9 @@ import { createEmployee, deleteEmployee, getEmployees, updateEmployee } from '..
 import IconButton from '@mui/material/IconButton';
 import DeleteIcon from '@mui/icons-material/Delete';
 import PencilIcon from '@mui/icons-material/Edit';
-import { Alert, Modal, Snackbar, TextField } from '@mui/material';
+import { Alert, Dialog, DialogTitle, DialogContent, DialogActions, Snackbar, TextField, Modal } from '@mui/material';
+import ReportTemplate from './ReportTemplate';
+import PdfList from './PdfList';
 
 interface TabPanelProps {
     children?: React.ReactNode;
@@ -57,7 +59,7 @@ export default function HomePage() {
 				fontWeight: '500',
 				fontSize: '30px'
             }
-        }>Bem vindo ao sistema de relatórios de horas mensais</p>
+        }>Bem vindo ao sistema de relatórios de horas semanais</p>
         <Box sx={{ width: '100%', height: '100%' }}>
             <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
                 <Tabs value={value} onChange={handleChange} aria-label="basic tabs example">
@@ -84,7 +86,7 @@ export default function HomePage() {
                         }}
                     />
                     <Tab
-                        label="Cadastrar pontos"
+                        label="Documentos assinados"
                         {...a11yProps(2)}
                         sx={{
                             color: value === 2 ? 'white' : 'white', // Cor do texto
@@ -100,7 +102,7 @@ export default function HomePage() {
                 <EmployeeList />
             </CustomTabPanel>
             <CustomTabPanel value={value} index={1}>
-                Item Two
+                <PdfList />
             </CustomTabPanel>
             <CustomTabPanel value={value} index={2}>
                 Item Three
@@ -112,11 +114,12 @@ export default function HomePage() {
 }
 
 function EmployeeList() {
-    const [rows, setRows] = React.useState<{ id: string; name: string; position: string; department: string; salary: number; hireDate: string }[]>([]);
+    const [rows, setRows] = React.useState<{ id: string; name: string; position: string; department: string; salary: number; hireDate: string, hours_worked_per_week: number }[]>([]);
     const [open, setOpen] = React.useState(false);
     const [isEditing, setIsEditing] = React.useState(false);
-    const [newEmployee, setNewEmployee] = React.useState({ id: '', name: '', position: '', department: '', salary: '', hireDate: '' });
+    const [newEmployee, setNewEmployee] = React.useState({ id: '', name: '', position: '', department: '', salary: '', hireDate: '', hours_worked_per_week: 0 });
     const [snackbar, setSnackbar] = React.useState<{ open: boolean; message: string; severity: 'success' | 'error' }>({ open: false, message: '', severity: 'success' });
+    const [showReportModal, setShowReportModal] = React.useState(false);
 
     React.useEffect(() => {
         fetchEmployees();
@@ -138,6 +141,7 @@ function EmployeeList() {
                         month: '2-digit',
                         year: 'numeric',
                     }),
+                    hours_worked_per_week: employee.hours_worked_per_week
                 }));
                 setRows(mappedEmployees);
             } else {
@@ -193,6 +197,7 @@ function EmployeeList() {
                 department: newEmployee.department,
                 salary: parseFloat(newEmployee.salary),
                 hireDate: new Date(newEmployee.hireDate).toISOString(),
+                hours_worked_per_week: newEmployee.hours_worked_per_week || 0
             };
 
             let response;
@@ -239,6 +244,7 @@ function EmployeeList() {
                 department: employeeToEdit.department,
                 salary: employeeToEdit.salary.toString(),
                 hireDate: hireDate.toISOString().split('T')[0],
+                hours_worked_per_week: employeeToEdit.hours_worked_per_week
             });
             setIsEditing(true);
             setOpen(true);
@@ -248,28 +254,33 @@ function EmployeeList() {
     };
 
     const handleOpen = () => {
-        setNewEmployee({ id: '', name: '', position: '', department: '', salary: '', hireDate: '' });
+        setNewEmployee({ id: '', name: '', position: '', department: '', salary: '', hireDate: '', hours_worked_per_week: 0});
         setIsEditing(false);
         setOpen(true);
     };
 
+    const handleReportOpen = () => {
+        setShowReportModal(true);
+    }
+
     const handleClose = () => setOpen(false);
+
+    const handleCloseReportModal = () => setShowReportModal(false);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
         setNewEmployee((prev) => ({ ...prev, [name]: value }));
     };
-
     const handleCloseSnackbar = () => {
         setSnackbar({ ...snackbar, open: false });
     };
-
     const columns: GridColDef[] = [
         { field: 'name', headerName: 'Nome', width: 200 },
         { field: 'position', headerName: 'Cargo', width: 200 },
         { field: 'department', headerName: 'Departamento', width: 200 },
         { field: 'salary', headerName: 'Salário', type: 'number', width: 130 },
         { field: 'hireDate', headerName: 'Data de contratação', width: 150 },
+        { field: 'hours_worked_per_week', headerName: 'Horas trabalhadas por semana', width: 250 },
         {
             field: 'actions',
             headerName: 'Ações',
@@ -293,23 +304,63 @@ function EmployeeList() {
                 <DataGrid
                     rows={rows}
                     columns={columns}
-                    pageSizeOptions={[5, 10]}
+                    rowsPerPageOptions={[5, 10, 20]}
                     checkboxSelection
+                    pagination
                     sx={{ border: 0 }}
                 />
             </Paper>
             <Box sx={{ display: 'flex', justifyContent: 'flex-end', p: 2 }}>
-                <Button variant="contained" color="inherit" onClick={handleOpen} sx={{ color: 'black' }}>
-                    Adicionar Colaborador
-                </Button>
+                <div style={{margin: '10px'}}>
+                    <Button variant="contained" color="inherit" onClick={handleReportOpen} sx={{ color: 'black' }}>
+                        Gerar relatório
+                    </Button>
+                </div>
+                <div style={{margin: '10px'}}>
+                    <Button variant="contained" color="inherit" onClick={handleOpen} sx={{ color: 'black' }}>
+                        Adicionar Colaborador
+                    </Button>
+                </div>
             </Box>
             <Modal open={open} onClose={handleClose}>
                 <Box sx={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: 400, bgcolor: 'background.paper', boxShadow: 24, p: 4 }}>
                     <h2>{isEditing ? 'Editar Colaborador' : 'Adicionar Colaborador'}</h2>
-                    <TextField label="Nome" name="name" fullWidth margin="normal" value={newEmployee.name} onChange={handleChange} />
-                    <TextField label="Cargo" name="position" fullWidth margin="normal" value={newEmployee.position} onChange={handleChange} />
-                    <TextField label="Departamento" name="department" fullWidth margin="normal" value={newEmployee.department} onChange={handleChange} />
-                    <TextField label="Salário" name="salary" fullWidth margin="normal" value={newEmployee.salary} onChange={handleChange} />
+                    <TextField 
+                        label="Nome" 
+                        name="name" 
+                        fullWidth 
+                        margin="normal" 
+                        value={newEmployee.name} 
+                        onChange={handleChange} 
+                        InputLabelProps={{ style: { color: 'black' } }}
+                    />
+                    <TextField 
+                        label="Cargo" 
+                        name="position" 
+                        fullWidth 
+                        margin="normal" 
+                        value={newEmployee.position} 
+                        onChange={handleChange} 
+                        InputLabelProps={{ style: { color: 'black' } }}
+                    />
+                    <TextField 
+                        label="Departamento" 
+                        name="department" 
+                        fullWidth 
+                        margin="normal" 
+                        value={newEmployee.department} 
+                        onChange={handleChange} 
+                        InputLabelProps={{ style: { color: 'black' } }}
+                    />
+                    <TextField 
+                        label="Salário" 
+                        name="salary" 
+                        fullWidth 
+                        margin="normal" 
+                        value={newEmployee.salary} 
+                        onChange={handleChange} 
+                        InputLabelProps={{ style: { color: 'black' } }}
+                    />
                     <TextField
                         label="Data de contratação"
                         name="hireDate"
@@ -320,7 +371,17 @@ function EmployeeList() {
                         onChange={handleChange}
                         InputLabelProps={{
                             shrink: true,
+                            style: { color: 'black' }
                         }}
+                    />
+                    <TextField 
+                        label="Horas trabalhadas por semana" 
+                        name="hours_worked_per_week" 
+                        fullWidth 
+                        margin="normal" 
+                        value={newEmployee.hours_worked_per_week} 
+                        onChange={handleChange} 
+                        InputLabelProps={{ style: { color: 'black' } }}
                     />
                     <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>
                         <Button variant="contained" color="inherit" sx={{ color: 'black' }} onClick={handleSaveEmployee}>
@@ -329,6 +390,19 @@ function EmployeeList() {
                     </Box>
                 </Box>
             </Modal>
+            <div>
+                <Dialog open={showReportModal} onClose={handleCloseReportModal} maxWidth="lg" fullWidth>
+                    <DialogTitle>Relatório Semanal</DialogTitle>
+                    <DialogContent>
+                        <ReportTemplate employees={rows} />
+                    </DialogContent>
+                    <DialogActions>
+                        <Button variant="contained" color="inherit" onClick={handleCloseReportModal}>
+                            Fechar
+                        </Button>
+                    </DialogActions>
+                </Dialog>
+            </div>
             <Snackbar open={snackbar.open} autoHideDuration={6000} onClose={handleCloseSnackbar}>
                 <Alert onClose={handleCloseSnackbar} severity={snackbar.severity} sx={{ width: '100%' }}>
                     {snackbar.message}
