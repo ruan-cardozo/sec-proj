@@ -57,7 +57,6 @@ export class ReportService {
     }
 
     async createReport(req, res) {
-        console.log('req', req);
 
         try {
             const mongo = MongoDB.getInstance();

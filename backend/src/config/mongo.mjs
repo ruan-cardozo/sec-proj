@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { _log } from "../common/helper/logger.mjs";
 
 const MONGO_URI= `mongodb://root:example@mongo:27017/cyber-sec-database?retryWrites=true&loadBalanced=false&connectTimeoutMS=10000&authSource=admin&authMechanism=SCRAM-SHA-1`;
 
@@ -25,7 +26,7 @@ export class MongoDB {
             const uri = MONGO_URI;
             try {
                 this.connection = await mongoose.connect(uri);
-                console.log('Connected to MongoDB');
+                _log('Connected to MongoDB');
             } catch (error) {
                 console.error('Error connecting to MongoDB', error);
                 throw error;
@@ -38,7 +39,7 @@ export class MongoDB {
         if (this.connection) {
             await mongoose.connection.close();
             this.connection = null;
-            console.log('Disconnected from MongoDB');
+            _log('Disconnected from MongoDB');
         }
     }
 }

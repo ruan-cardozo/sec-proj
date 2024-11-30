@@ -31,7 +31,6 @@ export class EmployeeService {
     async getOneEmployee(req, res) {
         try {
             const { id } = req.params;
-            console.log(req.params);
             const mongo = MongoDB.getInstance();
             mongo.connect();
             const db = mongoose.connection;
@@ -44,7 +43,6 @@ export class EmployeeService {
     }
 
     async createEmployee(req, res) {
-        console.log(req.body);
         
         try {
             const { name, position, department, salary, hireDate, hours_worked_per_week } = req.body;
@@ -60,7 +58,6 @@ export class EmployeeService {
     }
 
     async updateEmployee(req, res) {
-        console.log(req.body);
 
         try {
             const { id } = req.params;

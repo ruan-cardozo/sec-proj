@@ -227,10 +227,8 @@ function EmployeeList() {
     };
 
     const handleEdit = (id: string) => {
-        console.log('handleEdit called with id:', id); // Log for debugging
         const employeeToEdit = rows.find((row) => row.id === id);
         if (employeeToEdit) {
-            console.log('Employee to edit found:', employeeToEdit); // Log for debugging
             const hireDate = parseDate(employeeToEdit.hireDate);
             if (isNaN(hireDate.getTime())) {
                 console.error('Invalid hire date:', employeeToEdit.hireDate);

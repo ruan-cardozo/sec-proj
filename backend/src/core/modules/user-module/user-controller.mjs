@@ -48,7 +48,6 @@ export class UserController {
     }
 
     async createUser(req, res) {
-        console.log('aqui');
         
         try {
             let { name, email, password } = req.body;

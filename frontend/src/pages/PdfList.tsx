@@ -104,7 +104,7 @@ const PdfList: React.FC = () => {
     const handleSign = () => {
         // Lógica para assinar o documento
         console.log('Documento assinado:', selectedPdf);
-        handleClose();
+        handleClose(); 
     };
 
     const handleViewPDF = async (pdfId: string) => {

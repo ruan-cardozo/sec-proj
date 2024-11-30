@@ -29,7 +29,7 @@ export class EmailController {
     }
 
     async sendEmail(req, res) {
-        console.log(req);
+
     const { to } = req.body;
 
         return this.emailService.sendEmail(to);

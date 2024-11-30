@@ -10,6 +10,14 @@ import cookieParser from 'cookie-parser';
 import fileUpload from 'express-fileupload';
 import { ReportController } from './src/core/modules/report-module/report-controller.mjs';
 import { EmailController } from './src/core/modules/email-module/email-controller.mjs';
+import { SignatureController } from './src/core/modules/signature-module/signature-controller.mjs';
+import fs from 'fs';
+import path from 'path';
+import crypto from 'crypto';
+import { _log } from './src/common/helper/logger.mjs';
+
+const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY || 'zqufz8izbNPG4xwkrBl9f5kPtHLFrmhw';
+const IV_LENGTH = 16;
 class Server {
 	constructor() {
 		this.app = express();
@@ -18,6 +26,7 @@ class Server {
 		this.errorHandler();
 		this.app.use(this.interceptRequest);
 		// this.syncTables();
+		this.generateKeyPair();
 	}
 
 	config() {
@@ -25,7 +34,7 @@ class Server {
 			origin: ['http://localhost:5173', 'http://172.21.0.7:5173'],
 			credentials: true
 		}
-		this.app.use(cors());
+		this.app.use(cors(corsOptions));
 		this.app.use(express.json());
 		this.app.use(cookieParser());
 		this.app.use(fileUpload({
@@ -91,6 +100,54 @@ class Server {
 		this.app.post('/api/email', authenticateToken, emailController.sendEmail);
 	}
 
+	signatureRoutes() {
+		const signatureController = SignatureController.getInstance();
+
+        this.app.post('/api/sign-document', authenticateToken, signatureController.signDocument());
+        this.app.post('/api/verify-signature', authenticateToken, signatureController.verifySignature());
+    }
+
+	generateKeyPair() {
+        const keysDirectory = path.resolve(process.env.KEYS_DIRECTORY);
+        const privateKeyPath = path.join(keysDirectory, process.env.PRIVATE_KEY_PATH);
+        const publicKeyPath = path.join(keysDirectory, process.env.PUBLIC_KEY_PATH);
+
+        // Cria o diretório se ele não existir
+        if (!fs.existsSync(keysDirectory)) {
+            fs.mkdirSync(keysDirectory, { recursive: true });
+        }
+
+        if (!fs.existsSync(privateKeyPath) || !fs.existsSync(publicKeyPath)) {
+            const { publicKey, privateKey } = crypto.generateKeyPairSync('rsa', {
+                modulusLength: 2048,
+            });
+
+            fs.writeFileSync(privateKeyPath, this.encrypt(privateKey.export({ type: 'pkcs1', format: 'pem' })));
+            fs.writeFileSync(publicKeyPath, this.encrypt(publicKey.export({ type: 'pkcs1', format: 'pem' })));
+        }
+
+        this.privateKey = this.decrypt(fs.readFileSync(privateKeyPath, 'utf8'));
+        this.publicKey = this.decrypt(fs.readFileSync(publicKeyPath, 'utf8'));
+    }
+
+	encrypt(text) {
+        let iv = crypto.randomBytes(IV_LENGTH);
+        let cipher = crypto.createCipheriv('aes-256-cbc', Buffer.from(ENCRYPTION_KEY), iv);
+        let encrypted = cipher.update(text);
+        encrypted = Buffer.concat([encrypted, cipher.final()]);
+        return iv.toString('hex') + ':' + encrypted.toString('hex');
+    }
+
+    decrypt(text) {
+        let textParts = text.split(':');
+        let iv = Buffer.from(textParts.shift(), 'hex');
+        let encryptedText = Buffer.from(textParts.join(':'), 'hex');
+        let decipher = crypto.createDecipheriv('aes-256-cbc', Buffer.from(ENCRYPTION_KEY), iv);
+        let decrypted = decipher.update(encryptedText);
+        decrypted = Buffer.concat([decrypted, decipher.final()]);
+        return decrypted.toString();
+    }
+
 	errorHandler() {
 		this.app.use((err, req, res, next) => {
 		  console.error(err.stack);
@@ -100,12 +157,12 @@ class Server {
 
 	start() {
 		this.app.listen(process.env.PORT || 3000, () => {
-		  console.log('Server started on port 3000');
+			_log('Server started on port 3000');
 		});
 	}
 
 	interceptRequest(req, res, next) {
-		console.log(`${req.method} ${req.url}`);
+		_log(`Chegou uma requisição ${req.method} para a URL: ${req.url}`);
 		next();
 	}
 }

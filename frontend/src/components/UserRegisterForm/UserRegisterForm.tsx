@@ -19,10 +19,6 @@ function UserRegisterForm() {
 
 	const handleSubmit = async (event: React.FormEvent) => {
 		event.preventDefault();
-        
-
-        console.log(JSON.stringify(formData));
-
 
 		try {
 			const response = await fetch('http://localhost:3000/api/users', {

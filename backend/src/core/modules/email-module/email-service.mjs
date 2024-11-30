@@ -22,7 +22,6 @@ export class EmailService {
 
     async sendEmail(to) {
 
-        console.log(to);
         const mailOptions = {
             from: 'nao-responda@cyber-sec.com', // Remetente
             to: to,
@@ -85,10 +84,9 @@ export class EmailService {
         };
 
         try {
-            let info = await this.transporter.sendMail(mailOptions);
-            console.log('Email enviado: ' + info.response);
+            await this.transporter.sendMail(mailOptions);
         } catch (error) {
-            console.error('Erro ao enviar email: ', error);
+            _log('Erro ao enviar email: ', error);
         }
     }
 }
