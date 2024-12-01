@@ -39,9 +39,7 @@ const SignedPdfList: React.FC = () => {
             try {
                 const response = await fetch('http://localhost:3000/api/reports/signed', {
                     method: 'GET',
-                    headers: {
-                        'Authorization': 'Bearer ' + Cookies.get('token')
-                    }
+                    credentials: 'include'
                 });
                 
                 if (!response.ok) {
@@ -67,9 +65,9 @@ const SignedPdfList: React.FC = () => {
             const response = await fetch(`http://localhost:3000/api/verify-signature`, {
                 method: 'POST',
                 headers: {
-                    'Authorization': 'Bearer ' + Cookies.get('token'),
                     'Content-Type': 'application/json'
                 },
+                credentials: 'include',
                 body: JSON.stringify({ documentId: id})
             });
             
@@ -95,9 +93,7 @@ const SignedPdfList: React.FC = () => {
     const handleViewPDF = async (pdfId: string) => {
         try {
             const response = await fetch(`http://localhost:3000/api/reports/signed?documentId=${pdfId}`, {
-                headers: {
-                    'Authorization': 'Bearer ' + Cookies.get('token')
-                }
+                credentials: 'include'
             });
 
             if (!response.ok) {

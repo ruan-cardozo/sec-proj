@@ -1,7 +1,5 @@
 import { createContext, useContext, useState, ReactNode, useEffect } from 'react';
-import Cookies from 'js-cookie';
-import { login as apiLogin } from '../api/auth';
-import axiosInstance from '../api/axiosConfig';
+import axios from 'axios';
 
 interface AuthContextType {
     isAuthenticated: boolean;
@@ -15,17 +13,41 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
 
     useEffect(() => {
-        const token = Cookies.get('token');
-        if (token) {
-            setIsAuthenticated(true);
-        }
+        const checkAuth = async () => {
+            try {
+                const response = await fetch('http://localhost:3000/api/check-token', {
+                    method: 'GET',
+                    credentials: 'include'
+                 });
+                const data = await response.json();
+
+                if (data) {
+                    setIsAuthenticated(true);
+                }
+            } catch (error) {
+                setIsAuthenticated(false);
+            }
+        };
+
+        checkAuth();
     }, []);
 
     const login = async (email: string, password: string) => {
+
         try {
-            const response = await apiLogin(email, password);
-            if (response.status === 200) {
+            const response = await fetch('http://localhost:3000/api/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ email, password }),
+                credentials: 'include' // Incluir cookies na requisição
+            });
+
+            if (response.ok) {
                 setIsAuthenticated(true);
+            } else {
+                throw new Error('Erro ao fazer login. Verifique suas credenciais.');
             }
         } catch (error) {
             console.error('Erro ao fazer login:', error);
@@ -35,7 +57,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     const logout = async () => {
         try {
-            await axiosInstance.post('/logout');
+            await axios.post('http://localhost:3000/api/logout', {}, { withCredentials: true });
             setIsAuthenticated(false);
         } catch (error) {
             console.error('Erro ao fazer logout:', error);

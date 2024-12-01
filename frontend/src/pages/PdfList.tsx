@@ -40,9 +40,7 @@ const PdfList: React.FC = () => {
         const fetchPdfs = async () => {
             try {
                 const response = await fetch('http://localhost:3000/api/reports', {
-                    headers: {
-                        'Authorization': 'Bearer ' + Cookies.get('token')
-                    }
+                    credentials: 'include'
                 });
                 
                 if (!response.ok) {
@@ -64,9 +62,7 @@ const PdfList: React.FC = () => {
     const handleDownload = async (id: string, name: string) => {
         try {
             const response = await fetch(`http://localhost:3000/api/reports/${id}`, { 
-                headers:{ 
-                    'Authorization': 'Bearer ' + Cookies.get('token')
-                }
+                credentials: 'include'
             });
             
             if (!response.ok) {
@@ -94,9 +90,7 @@ const PdfList: React.FC = () => {
     const handleViewPDF = async (pdfId: string) => {
         try {
             const response = await fetch(`http://localhost:3000/api/reports/${pdfId}`, {
-                headers: {
-                    'Authorization': 'Bearer ' + Cookies.get('token')
-                }
+                credentials: 'include'
             });
 
             if (!response.ok) {
@@ -126,9 +120,7 @@ const PdfList: React.FC = () => {
     const handleDelete = async (pdfId: string) => {
         try {
             const response = await fetch(`http://localhost:3000/api/reports/${pdfId}`, {
-                headers: {
-                    'Authorization': 'Bearer ' + Cookies.get('token')
-                },
+                credentials: 'include',
                 method: 'DELETE'
             });
         
@@ -139,9 +131,7 @@ const PdfList: React.FC = () => {
             const fetchPdfs = async () => {
                 try {
                     const response = await fetch('http://localhost:3000/api/reports', {
-                        headers: {
-                            'Authorization': 'Bearer ' + Cookies.get('token')
-                        }
+                        credentials: 'include'
                     });
                     
                     if (!response.ok) {
@@ -179,9 +169,9 @@ const PdfList: React.FC = () => {
             await fetch(`http://localhost:3000/api/email`, {
                 method: 'POST',
                 headers: {
-                    'Authorization': 'Bearer ' + Cookies.get('token'),
                     'Content-Type': 'application/json'
                 },
+                credentials: 'include',
                 body: JSON.stringify({ to: email, documentId: pdfId }),
             });
 

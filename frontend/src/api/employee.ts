@@ -1,5 +1,3 @@
-import Cookies from 'js-cookie';
-
 export type Employee = {
     id?: string;
     name: string;
@@ -17,9 +15,9 @@ export const getEmployees = async () => {
         const response = await fetch(url, {
             method: 'GET',
             headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${Cookies.get('token')}`
+                'Content-Type': 'application/json'
             },
+            credentials: 'include'
             
         });
 
@@ -36,10 +34,10 @@ export const createEmployee = async (employee: Employee) => {
         const response = await fetch(url, {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${Cookies.get('token')}`
+                'Content-Type': 'application/json'
             },
             body: JSON.stringify(employee),
+            credentials: 'include'
         });
 
         return response;
@@ -55,10 +53,10 @@ export const updateEmployee = async (employee: Employee) => {
         const response = await fetch(url, {
             method: 'PUT',
             headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${Cookies.get('token')}`
+                'Content-Type': 'application/json'
             },
             body: JSON.stringify(employee),
+            credentials: 'include'
         });
 
         return response;
@@ -76,9 +74,9 @@ export const deleteEmployee = async (id: string) => {
         const response = await fetch(url, {
             method: 'DELETE',
             headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${Cookies.get('token')}`
+                'Content-Type': 'application/json'
             },
+            credentials: 'include'
 
         });
 

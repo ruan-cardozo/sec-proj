@@ -20,9 +20,7 @@ const SignDocumentPage = () => {
             try {
                 const response = await fetch(`http://localhost:3000/api/reports/${documentId}`, {
                     method: 'GET',
-                    headers: {
-                        'Authorization': 'Bearer ' + Cookies.get('token')
-                    }
+                    credentials: 'include'
                 });
                 const blob = await response.blob();
 
@@ -45,8 +43,8 @@ const SignDocumentPage = () => {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
-              'Authorization': `Bearer ${Cookies.get('token')}`
             },
+            credentials: 'include',
             body: JSON.stringify({
             documentId: documentId,
             userName: userName

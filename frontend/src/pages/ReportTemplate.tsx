@@ -94,9 +94,7 @@ const ReportTemplate: React.FC<ReportTemplateProps> = ({ employees }) => {
             const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 seconds timeout
 
             const response = await fetch('http://localhost:3000/api/reports', {
-                headers: {
-                    'Authorization': 'Bearer ' + Cookies.get('token')
-                },
+                credentials: 'include',
                 method: 'POST',
                 body: formData,
                 signal: controller.signal

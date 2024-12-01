@@ -29,9 +29,6 @@ function UserRegisterForm() {
 				body: JSON.stringify(formData)
 			});
 
-            console.log(response);
-            
-
 			if (response.ok) {
 				alert('Usuário cadastrado com sucesso!');
 
