@@ -12,6 +12,7 @@ import PencilIcon from '@mui/icons-material/Edit';
 import { Alert, Dialog, DialogTitle, DialogContent, DialogActions, Snackbar, TextField, Modal } from '@mui/material';
 import ReportTemplate from './ReportTemplate';
 import PdfList from './PdfList';
+import SignedPdfList from './SignedPdfList';
 
 interface TabPanelProps {
     children?: React.ReactNode;
@@ -105,7 +106,7 @@ export default function HomePage() {
                 <PdfList />
             </CustomTabPanel>
             <CustomTabPanel value={value} index={2}>
-                Item Three
+                <SignedPdfList />
             </CustomTabPanel>
             </Box>
         </>
@@ -181,10 +182,10 @@ function EmployeeList() {
             setRows(mappedEmployees);
 
             setRows(rows.filter((row: { id: string }) => row.id !== id));
-            setSnackbar({ open: true, message: 'Employee deleted successfully', severity: 'success' });
+            setSnackbar({ open: true, message: 'Colaborador deletado com sucesso', severity: 'success' });
         } catch (error) {
             console.error('Error deleting employee:', error);
-            setSnackbar({ open: true, message: 'Error deleting employee', severity: 'error' });
+            setSnackbar({ open: true, message: 'Erro ao deletar o colaborador', severity: 'error' });
         }
     };
 
@@ -210,14 +211,14 @@ function EmployeeList() {
             if (response && response.ok) {
                 fetchEmployees();
                 handleClose();
-                setSnackbar({ open: true, message: isEditing ? 'Employee updated successfully' : 'Employee added successfully', severity: 'success' });
+                setSnackbar({ open: true, message: isEditing ? 'Colaborador atualizado com sucesso' : 'Colaborador criado com successo', severity: 'success' });
             } else {
-                console.error('Failed to save employee');
-                setSnackbar({ open: true, message: 'Failed to save employee', severity: 'error' });
+                console.error('Houve uma falha ao salvar o colaborador');
+                setSnackbar({ open: true, message: 'Houve uma falha ao salvar o colaborador', severity: 'error' });
             }
         } catch (error) {
             console.error('Error saving employee:', error);
-            setSnackbar({ open: true, message: 'Error saving employee', severity: 'error' });
+            setSnackbar({ open: true, message: 'Houve uma falha ao salvar o colaborador', severity: 'error' });
         }
     };
 

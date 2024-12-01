@@ -5,7 +5,7 @@ function HomePageButton() {
 
     const location = useLocation();
 
-    if (location.pathname == '/register' || location.pathname == '/login' || location.pathname == '/update' || location.pathname == '/home') return; 
+    if (location.pathname == '/register' || location.pathname == '/login' || location.pathname == '/update' || location.pathname == '/home' || location.pathname.includes('sign-document')) return; 
     
     return (
 

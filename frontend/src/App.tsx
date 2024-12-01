@@ -6,9 +6,9 @@ import UserLoginForm from './components/UserLoginForm/UserLoginForm';
 import { AuthProvider } from './context/AuthContext';
 import HomePage from './pages/HomePage';
 import ProtectedRoute from './routes/ProtectedRoute';
+import SignDocumentPage from './pages/SignDocumentPage';
 
 function App() {
-
   return (
     <>
       <AuthProvider>
@@ -18,7 +18,8 @@ function App() {
               <Route path="/register" element={<UserRegisterForm />} />
               <Route path="/login" element={<UserLoginForm />} />
               <Route element={<ProtectedRoute />}>
-                        <Route path="/home" element={<HomePage />} />
+                <Route path="/home" element={<HomePage />} />
+                <Route path='/sign-document/:documentId' element={<SignDocumentPage/>}></Route>
               </Route>
             </Routes>
         </Router>

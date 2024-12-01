@@ -27,9 +27,9 @@ const StyledButton = styled(Button)(({ theme }) => ({
 
 const PdfList: React.FC = () => {
     const [pdfs, setPdfs] = useState<PDF[]>([]);
-    const [open, setOpen] = useState(false);
     const [selectedPdf, setSelectedPdf] = useState<PDF | null>(null);
     const [viewOpen, setViewOpen] = useState(false);
+    const [emailOpen, setEmailOpen] = useState(false);
     const [pdfUrl, setPdfUrl] = useState<string | null>(null);
     const [snackbarOpen, setSnackbarOpen] = useState(false);
     const [snackbarMessage, setSnackbarMessage] = useState('');
@@ -89,22 +89,6 @@ const PdfList: React.FC = () => {
             setSnackbarSeverity('error');
             setSnackbarOpen(true);
         }
-    };
-
-    const handleOpen = (pdf: PDF) => {
-        setSelectedPdf(pdf);
-        setOpen(true);
-    };
-
-    const handleClose = () => {
-        setOpen(false);
-        setSelectedPdf(null);
-    };
-
-    const handleSign = () => {
-        // Lógica para assinar o documento
-        console.log('Documento assinado:', selectedPdf);
-        handleClose(); 
     };
 
     const handleViewPDF = async (pdfId: string) => {
@@ -189,16 +173,16 @@ const PdfList: React.FC = () => {
         setSnackbarOpen(false);
     };
 
-    const handleSendEmail = (pdfId: string) => {
-
-        try {
-            fetch(`http://localhost:3000/api/email`, {
+    const handleSendEmail = async (pdfId: string) => {
+ 
+        try {   
+            await fetch(`http://localhost:3000/api/email`, {
+                method: 'POST',
                 headers: {
                     'Authorization': 'Bearer ' + Cookies.get('token'),
                     'Content-Type': 'application/json'
                 },
-                method: 'POST',
-                body: JSON.stringify({ to: email }),
+                body: JSON.stringify({ to: email, documentId: pdfId }),
             });
 
             const pdfName = pdfs.find(pdf => pdf._id === pdfId)?.name;
@@ -210,6 +194,17 @@ const PdfList: React.FC = () => {
         }
     };
 
+    const handleOpenEmailModal = (pdf: PDF) => {
+            
+        setSelectedPdf(pdf);
+        setEmailOpen(true);
+    }
+
+    const handleCloseEmailModal = () => {
+        setEmailOpen(false);
+        setEmail('');
+    }
+
     return (
         <Container style={{ width: '100%', maxWidth: 'none' }}>
             <Typography variant="h4" gutterBottom style={{color: 'white'}}>Lista de PDFs</Typography>
@@ -218,21 +213,12 @@ const PdfList: React.FC = () => {
                     <StyledListItem style={{ width: '100%'}} key={pdf._id}>
                         <ListItemText primary={pdf.name} />
                         <StyledButton variant="contained" color="primary" onClick={() => handleDownload(pdf._id, pdf.name)}>Download</StyledButton>
-                        <StyledButton variant="contained" color="secondary" onClick={() => handleOpen(pdf)}>Assinar</StyledButton>
                         <StyledButton variant="contained" onClick={() => handleViewPDF(pdf._id)}>Visualizar</StyledButton>
-                        <StyledButton variant="contained" data-pdfid={pdf._id} onClick={() => handleOpen(pdf)}>Notificar por e-mail</StyledButton>
+                        <StyledButton variant="contained" data-pdfid={pdf._id} onClick={() => handleOpenEmailModal(pdf)}>Notificar por e-mail</StyledButton>
                         <StyledButton variant="contained" onClick={() => handleDelete(pdf._id)}>Apagar PDF</StyledButton>
                     </StyledListItem>
                 ))}
             </List>
-            <Modal open={open} onClose={handleClose}>
-                <Box sx={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: 400, bgcolor: 'background.paper', boxShadow: 24, p: 4 }}>
-                    <Typography variant="h6" gutterBottom>Assinar Documento</Typography>
-                    <TextField fullWidth label="Nome" margin="normal" />
-                    <TextField fullWidth label="Assinatura" margin="normal" />
-                    <Button variant="contained" color="primary" onClick={handleSign}>Assinar</Button>
-                </Box>
-            </Modal>
             <Modal open={viewOpen} onClose={handleViewClose}>
                 <Box sx={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: '80%', height: '80%', bgcolor: 'background.paper', boxShadow: 24, p: 4 }}>
                     {pdfUrl && (
@@ -247,7 +233,7 @@ const PdfList: React.FC = () => {
                 </Box>
             </Modal>
             {/* Modal para selecionar o email do destinatário */}
-            <Modal open={open} onClose={handleClose}>
+            <Modal open={emailOpen} onClose={handleCloseEmailModal}>
                 <Box sx={{ 
                     position: 'absolute', 
                     top: '50%', 
@@ -268,7 +254,7 @@ const PdfList: React.FC = () => {
                         onChange={(e) => setEmail(e.target.value)}
                         margin="normal"
                     />
-                    <Button variant="contained" color="primary" onClick={handleSendEmail}>
+                    <Button variant="contained" color="primary" onClick={() => selectedPdf?._id && handleSendEmail(selectedPdf._id)}>
                         Enviar
                     </Button>
                 </Box>

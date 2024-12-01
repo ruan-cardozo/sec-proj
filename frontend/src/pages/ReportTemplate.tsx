@@ -69,12 +69,6 @@ const ReportTemplate: React.FC<ReportTemplateProps> = ({ employees }) => {
                 styles: { fontSize: 10, cellPadding: 3 },
             });
 
-            // Adiciona espaço para assinatura do gestor
-            const finalY = (doc as any).autoTable.previous.finalY;
-            doc.text('Assinatura do Gestor:', 14, finalY + 20);
-            doc.line(14, finalY + 30, 100, finalY + 30); // Linha para assinatura
-
-            // Gera o PDF como Blob
             const pdfBlob = doc.output('blob');
             const pdfUrl = URL.createObjectURL(pdfBlob);
             setPdfUrl(pdfUrl);
