@@ -1,4 +1,5 @@
 import nodemailer from 'nodemailer';
+import { _log } from '../../../common/helper/logger.mjs';
 
 export class EmailService {
 
@@ -21,7 +22,7 @@ export class EmailService {
     }
 
     async sendEmail(to, documentId) {
-        console.log('Sending email to: ', to);
+        _log(`Sending email to: ${to}`);
         
         const signLink = `http://localhost:5173/sign-document/${documentId}`;
         const mailOptions = {

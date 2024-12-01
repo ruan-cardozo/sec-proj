@@ -18,7 +18,7 @@ import { _log } from './src/common/helper/logger.mjs';
 import helmet from 'helmet';
 
 const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY || 'zqufz8izbNPG4xwkrBl9f5kPtHLFrmhw';
-const IV_LENGTH = 16;
+const IV_LENGTH = process.env.IV_LENGTH || 16;
 class Server {
 
 	constructor() {
@@ -29,6 +29,13 @@ class Server {
 		this.errorHandler();
 		this.app.use(this.interceptRequest);
 		this.app.use(helmet());
+		this.app.use((req, res, next) => {
+			res.header('Access-Control-Allow-Origin', 'http://localhost:5173');
+			res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+			res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+			res.header('Access-Control-Allow-Credentials', 'true');
+			next();
+		});
 	}
 
 	config() {
