@@ -20,8 +20,10 @@ export class EmailService {
         return EmailService.#instance;
     }
 
-    async sendEmail(to) {
-
+    async sendEmail(to, documentId) {
+        console.log('Sending email to: ', to);
+        
+        const signLink = `http://localhost:5173/sign-document/${documentId}`;
         const mailOptions = {
             from: 'nao-responda@cyber-sec.com', // Remetente
             to: to,
@@ -72,7 +74,8 @@ export class EmailService {
                 <div class="content">
                     <p>Olá,</p>
                     <p>Você tem um novo relatório de horas semanais para assinar.</p>
-                    <p>Por favor, acesse o sistema para visualizar e assinar o relatório.</p>
+                    <p>Por favor, acesse o link abaixo: </p>
+                    <p><a href="${signLink}">Clique aqui para assinar o documento</a></p>
                 </div>
                 <div class="footer">
                     <p>Este é um email automático, por favor, não responda.</p>

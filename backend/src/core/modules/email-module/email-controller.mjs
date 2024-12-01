@@ -30,8 +30,8 @@ export class EmailController {
 
     async sendEmail(req, res) {
 
-    const { to } = req.body;
+    const { to, documentId } = req.body;
 
-        return this.emailService.sendEmail(to);
+        return this.emailService.sendEmail(to, documentId);
     }
 }

@@ -15,18 +15,20 @@ import fs from 'fs';
 import path from 'path';
 import crypto from 'crypto';
 import { _log } from './src/common/helper/logger.mjs';
+import helmet from 'helmet';
 
 const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY || 'zqufz8izbNPG4xwkrBl9f5kPtHLFrmhw';
 const IV_LENGTH = 16;
 class Server {
+
 	constructor() {
 		this.app = express();
 		this.config();
+		this.generateKeyPair();
 		this.routes();
 		this.errorHandler();
 		this.app.use(this.interceptRequest);
-		// this.syncTables();
-		this.generateKeyPair();
+		this.app.use(helmet());
 	}
 
 	config() {
@@ -56,6 +58,7 @@ class Server {
 		this.employeeRoutes();
 		this.pdfRoutes();
 		this.emailRoutes();
+		this.signatureRoutes();
 	}
 
 	userRoutes() {
@@ -90,6 +93,7 @@ class Server {
 
 		this.app.post('/api/reports', authenticateToken, reportController.createReport);
 		this.app.get('/api/reports', authenticateToken, reportController.getAllReports);
+		this.app.get('/api/reports/signed', authenticateToken, reportController.getAllReportsSigned);
 		this.app.get('/api/reports/:id', authenticateToken, reportController.getOneReport);
 		this.app.delete('/api/reports/:id', authenticateToken, reportController.deleteReport);
 	}
@@ -101,10 +105,10 @@ class Server {
 	}
 
 	signatureRoutes() {
-		const signatureController = SignatureController.getInstance();
+		const signatureController = SignatureController.getInstance(this.privateKey, this.publicKey);
 
-        this.app.post('/api/sign-document', authenticateToken, signatureController.signDocument());
-        this.app.post('/api/verify-signature', authenticateToken, signatureController.verifySignature());
+        this.app.post('/api/sign-document', authenticateToken, signatureController.signDocument);
+        this.app.post('/api/verify-signature', authenticateToken, signatureController.verifySignature);
     }
 
 	generateKeyPair() {

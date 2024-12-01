@@ -7,15 +7,15 @@ export class SignatureController {
 
     constructor(privateKey, publicKey) {
         this.#signatureService = SignatureService.getInstance(privateKey, publicKey);
-        ['signDocument'].forEach(method => {
+        ['signDocument', 'verifySignature'].forEach(method => {
             this[method] = this[method].bind(this);
         });
     }
 
-    static getInstance() {
+    static getInstance(privateKey, publicKey) {
 
         if (!this.#instance) {
-            this.#instance = new SignatureController();
+            this.#instance = new SignatureController(privateKey, publicKey);
         }
         return this.#instance;
     }
@@ -29,4 +29,10 @@ export class SignatureController {
 
         return this.signatureService.signDocument(req, res);
     }
+
+    async verifySignature(req, res) {
+
+        return this.signatureService.verifySignature(req, res);
+    }
+
 }

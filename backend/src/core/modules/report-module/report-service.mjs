@@ -56,6 +56,45 @@ export class ReportService {
         }
     }
 
+    async getAllReportsSigned(req, res) {
+        try {
+            const mongo = MongoDB.getInstance();
+            await mongo.connect();
+            const db = mongoose.connection;
+    
+            const collection = db.collection('signed_pdfs');
+            const hasFilters = Object.keys(req.query).length > 0;
+    
+            if (hasFilters) {
+                const { documentId } = req.query;
+    
+                if (!mongoose.Types.ObjectId.isValid(documentId)) {
+                    return res.status(400).json({ message: 'ID inválido' });
+                }
+    
+                const document = await collection.findOne({ _id: new mongoose.Types.ObjectId(documentId) });
+    
+                if (!document) {
+                    return res.status(404).json({ message: 'Documento não encontrado' });
+                }
+
+                if (document.pdfBuffer) {
+                    document.pdfBytes = Array.from(new Uint8Array(document.pdfBuffer.buffer));
+                } else {
+                    document.pdfBytes = [];
+                }
+
+                return res.json(document);
+            } else {
+                const documents = await collection.find().toArray();
+                return res.json(documents);
+            }
+        } catch (error) {
+            console.error('Erro ao buscar relatórios assinados:', error);
+            return res.status(500).json({ message: 'Erro ao buscar relatórios assinados' });
+        }
+    }
+
     async createReport(req, res) {
 
         try {

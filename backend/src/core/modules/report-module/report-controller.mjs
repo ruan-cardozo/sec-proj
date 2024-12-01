@@ -7,7 +7,7 @@ export class ReportController {
 
     constructor() {
         this.#reportService = ReportService.getInstance();
-        ['getAllReports', 'getOneReport', 'createReport', 'deleteReport'].forEach(method => {
+        ['getAllReports', 'getOneReport', 'createReport', 'deleteReport', 'getAllReportsSigned'].forEach(method => {
             this[method] = this[method].bind(this);
         });
     }
@@ -40,6 +40,11 @@ export class ReportController {
     createReport(req, res) {
 
        return this.reportService.createReport(req, res);
+    }
+
+    getAllReportsSigned(req, res) {
+
+        return this.reportService.getAllReportsSigned(req, res);
     }
 
     deleteReport(req, res) {
