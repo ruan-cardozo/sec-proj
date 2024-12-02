@@ -19,10 +19,6 @@ function UserRegisterForm() {
 
 	const handleSubmit = async (event: React.FormEvent) => {
 		event.preventDefault();
-        
-
-        console.log(JSON.stringify(formData));
-
 
 		try {
 			const response = await fetch('http://localhost:3000/api/users', {
@@ -32,9 +28,6 @@ function UserRegisterForm() {
 				},
 				body: JSON.stringify(formData)
 			});
-
-            console.log(response);
-            
 
 			if (response.ok) {
 				alert('Usuário cadastrado com sucesso!');
@@ -54,6 +47,11 @@ function UserRegisterForm() {
 
 	return (
         <div className='row'>
+            <h1 style={{
+				color: 'white',
+				fontWeight: '700',
+				fontSize: '70px'
+			}}>Crie sua conta</h1>
             <div className='box'> 
                 <form className="register-form" onSubmit={handleSubmit}>
                     <div className="form-group">
@@ -95,6 +93,15 @@ function UserRegisterForm() {
                     <button type="submit" className="btn-form">Registrar</button>
                 </form>
             </div>
+            <p
+            style={{
+                color: 'white',
+                fontWeight: '700',
+                fontSize: '20px'
+            }}
+            >Já tem uma conta? 
+            <br />
+            Clique no botão abaixo para realizar o login</p>
             <button type='button' onClick={() => navigate('/login')} className="btn-login" > Ir para o login</button>
         </div>
     );

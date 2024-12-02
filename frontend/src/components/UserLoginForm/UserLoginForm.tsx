@@ -1,53 +1,46 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
 import './UserLoginForm.css';
 
 function UserLoginForm() {
-
-	const [formData, setFormData] = useState({
-		email: '',
-		password: ''
-	});
+    const [formData, setFormData] = useState({
+        email: '',
+        password: ''
+    });
     const navigate = useNavigate();
+    const { login } = useAuth();
 
-	const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-		const { name, value } = event.target;
-		setFormData({ ...formData, [name]: value });
-	};
+    const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const { name, value } = event.target;
+        setFormData({ ...formData, [name]: value });
+    };
 
-	const handleSubmit = async (event: React.FormEvent) => {
-		event.preventDefault();
-        
+    const handleSubmit = async (event: React.FormEvent) => {
+        event.preventDefault();
 
-        console.log(JSON.stringify(formData));
+        try {
+            await login(formData.email, formData.password);
 
+            setFormData({
+                email: '',
+                password: ''
+            });
+            alert('Usuário autenticado com sucesso!');
+            navigate('/home');
+        } catch (error) {
+            alert('Ocorreu um erro ao autenticar o usuário!');
+            console.error('Erro ao fazer login:', error);
+        }
+    };
 
-		try {
-			const response = await fetch('http://localhost:3000/api/users', {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-				},
-				body: JSON.stringify(formData)
-			});
-
-			if (response.ok) {
-				alert('Usuário foi logado com sucesso');
-
-				setFormData({
-					email: '',
-					password: ''
-				});
-			} else {
-				alert('Ocorreu um erro ao autenticar o usuário!');
-			}
-		} catch (error) {
-			console.error('Ocorreu um erro ao enviar os dados para a api', error);
-		}
-	};
-
-	return (
+    return (
         <div className='row'>
+            <h1 style={{
+                color: 'white',
+                fontWeight: '700',
+                fontSize: '70px'
+            }}>Faça o login</h1>
             <div className='box'> 
                 <form className="register-form" onSubmit={handleSubmit}>
                     <div className="form-group">
@@ -77,7 +70,14 @@ function UserLoginForm() {
                     <button type="submit" className="btn-form">Login</button>
                 </form>
             </div>
-            <button type='button' onClick={() => navigate('/register')} className="btn-register" > Ir para registrar-se</button>
+            <p
+            style={{
+                color: 'white',
+                fontWeight: '700',
+                fontSize: '20px'
+            }}
+            >Ainda não tem conta ? Clique no botão abaixo</p>
+            <button type='button' onClick={() => navigate('/register')} className="btn-register" >Registrar-se</button>
         </div>
     );
 }

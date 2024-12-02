@@ -1,0 +1,26 @@
+services:
+  backend:
+    container_name: backend
+    build:
+     context: ../backend
+     dockerfile: Dockerfile
+    env_file:
+      - ../backend/src/common/env/.env
+    ports:
+      - "3000:3000"
+    volumes:
+      - ../backend:/app
+      - ../backend/node_modules:/app/node_modules
+    working_dir: /app
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - cyber-sec
+    restart: unless-stopped
+    read_only: true
+    tmpfs:
+      - /tmp
+
+networks:
+  cyber-sec:
+    external: true
